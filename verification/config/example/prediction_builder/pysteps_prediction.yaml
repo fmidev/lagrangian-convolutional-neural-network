@@ -1,0 +1,81 @@
+# pysteps data source type (str) for reading radar data
+data_source_name : fmi
+
+# platform specific paths
+# list of timestamps to use
+datelist_path : "datelists/fmi_rainy_days_bbox_test.txt"
+# name of the output HDF5 archive
+hdf5_path : "prediction_db_vet.hdf5"
+
+# config regarding reading in radar data
+input : 
+  # how many radar images to load after the first one?
+  num_next_files : 1
+
+# config regarding writing predictions to disk
+save : 
+  # which prediction leadtime indices to save?
+  save_indexes : [0,1,2,3,4,5,6,7,8,9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35] 
+  # HDF5 file directory format for each prediction. {method} is nowcast.nowcast_method, timestamp is from datelist
+  group_format : "{timestamp}/{method}"
+  # "What" attributes of predictions, reminescent of the ODIM format
+  # These are metadata used for scale-offset UINT8 compression. 
+  what_attrs : 
+    quantity : DBZH
+    gain : 0.5
+    offset : -32
+    nodata : 255
+    undetect : 255
+
+# config regarding the preprocessing of dBZH input data
+preprocessing : 
+  # convert dBZ -> RR (mm/h)
+  convert : True
+  # convert to decibel-units RR -> dBR, only applicable if convert : True
+  db_transform : false
+  # thresholding field value, below which obseravations are set to zerovalue
+  threshold : 0.1
+  zerovalue : 15.0
+  # Bounding box applied to the input data (before scaling)
+  bbox : [125,637,604,1116]
+  # convert field NaN values to zerovalue.
+  nan_to_zero : True
+  # factor by which to downscale the input data
+  downscaling : 1.0
+
+# config regarding the nowcast in itself
+# Please refer to the Pysteps wiki for information on available optical flow and nowcasting methods
+nowcast : 
+  # nowcast method identifier, as described in 
+  # [https://pysteps.readthedocs.io/en/stable/generated/pysteps.nowcasts.interface.get_method.html]
+  nowcast_method : "extrapolation"
+  # Optical flow method identifier, as described in
+  # [https://pysteps.readthedocs.io/en/stable/generated/pysteps.motion.interface.get_method.html]
+  oflow_method : "lucaskanade"
+  # Tuple passed to slice(start, stop, step) [https://docs.python.org/3/library/functions.html#slice]
+  # determining which leadtimes of the input data to feed into the nowcast function
+  sample_slice : [-1, null, null]
+  # Tuple passed to slice(start, stop, step) [https://docs.python.org/3/library/functions.html#slice]
+  # determining which leadtimes of the input data to feed into the optical flow function
+  oflow_slice : [0, -1, 1]
+  # how many leadtimes to perform the nowcasting for
+  n_leadtimes : 36
+  
+  # Arguments to the optical flow method chosen
+  oflow_params : {} 
+  # Arguments to the nowcasting method chosen
+  nowcast_params : {}
+
+# config regarding the postprocessing of nowcasts, applied before saving to disk.
+postprocessing : 
+  # convert RR (mm/h) -> dBZ
+  convert : True
+  # convert back dBR -> RR (mm/h), only applicable if convert : True
+  db_transform : false
+  # threshold before conversion and possible inverse db_transformation for zero values
+  threshold : -10.0
+  # zerovalue as expressed after possible inverse db_transform but before possible convert
+  zerovalue : 0.0
+  # convert field NaN values to zerovalue (after all conversions)
+  nan_to_zero : True
+

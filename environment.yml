@@ -1,0 +1,31 @@
+name: lcnn
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - attrdict
+  - arm_pyart
+  - h5py
+  - hdf5plugin
+  - dask
+  - numpy
+  - python=3.9
+  - pandas
+  - ipdb
+  - matplotlib
+  - cartopy
+  - tensorboard
+  - torchvision
+  # - torchaudio
+  - pytorch
+  # - cpuonly
+  - pysteps
+  - ca-certificates
+  - certifi
+  - openssl
+  - scipy
+  - scikit-image
+  - scikit-learn
+  - seaborn
+  - pytorch-lightning
+  - tqdm

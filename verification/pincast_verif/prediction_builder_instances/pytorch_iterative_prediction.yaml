@@ -1,0 +1,86 @@
+# Which data source to use for pysteps data loading
+data_source_name : fmi
+
+# platform specific paths
+# datelist read for which composite to test
+datelist_path : "datelists/fmi_rainy_days_bbox_test.txt"
+# where to save predictions?
+hdf5_path : "db/pred_pytorch_10p_lt5-msssim-255to10range.hdf5"
+# path to hdf5 db containing advection mask to apply 
+advection_mask_path : "db/advection_mask_db.hdf5"
+# Where is the trained model saved ? 
+model_path : "results/rn_lt5_msssim_10p_255to10range.ckpt"
+# Which device to predict on ? 'cpu' or 'cuda' for ex.
+model_device : 'cpu'
+
+input : 
+  # nbr of files fed into the NN minus one. E.g. with 4 inputs , num_next_files = 3
+  num_next_files : 3
+
+save : 
+  use_advection_mask : True
+  # leadtimes to save predictions for 
+  save_indexes : [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+    16,17,18,19,20,21,22,23,24,25,26,27,
+    28,29,30,31,32,33,34,35] 
+  # where to save predictions in the HDF5 file
+  group_format : "{timestamp}/{method}"
+  # Attributes of the dataset in the HDF5 file
+  what_attrs : 
+    quantity : DBZH
+    gain : 0.5
+    offset : -32
+    nodata : 255
+    undetect : 255
+
+preprocessing : 
+  # Bounding box 
+  bbox : [125,637,604,1116]
+  # Factor for downscaling the image
+  downscaling : 2
+  # Convert NaN values to zeros? 
+  nan_to_zero : True
+
+nowcast : 
+  # Is going to determine method name in HDF5 file too 
+  nowcast_method : "pytorch"
+  # number of leadtimes to calculate prediction for
+  n_leadtimes : 36
+  # Image size, should be consistent with bbox, downscaling
+  im_size : [256,256]
+
+postprocessing : 
+  # if convert nan to zeros, what is zeros
+  zerovalue : 0.0
+  # Convert NaN values to zeros? 
+  nan_to_zero : True
+
+modelconf : 
+  # configurations for RainNet model
+  # Parameters for training model
+  train_params : 
+      save_metrics : False
+  model:
+      rainnet:
+          kernel_size : 3
+          mode : "regression"
+          input_shape : [4,512,512]
+          conv_shape : [["1", [4,64]],
+                          ["2" , [64,128]],
+                          ["3" , [128,256]],
+                          ["4" , [256,512]],
+                          ["5" , [512,1024]],
+                          ["6" , [1536,512]],
+                          ["7" , [768,256]],
+                          ["8" , [384,128]],
+                          ["9" , [192,64]]]
+          
+      loss : 
+          name : "log_cosh"
+          kwargs : {}
+          discount_rate : 1.0
+      n_leadtimes : 1
+      lr : 1e-04
+      intensity_thresholds : [01,05,10,20,30]
+      display : 50
+      

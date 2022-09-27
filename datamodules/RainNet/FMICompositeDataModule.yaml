@@ -1,0 +1,4 @@
+train_batch_size: 1
+valid_batch_size: 10
+test_batch_size: 10
+db_path : "/home/users/harnist/hdf5_dataset/fmi_composite_raindays.hdf5"

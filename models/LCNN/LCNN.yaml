@@ -1,0 +1,52 @@
+# configurations for LCNN model
+
+# Parameters for training model
+train_params:
+  device: cpu
+  train_batch_size: 2
+  valid_batch_size: 1
+  test_batch_size: 1
+  max_epochs: 10
+  # Max time used for training (days:hours:mins:secs)
+  max_time: "03:00:00:00"
+  # Validate after every n batches
+  val_check_interval: 1.0
+  num_workers: 5
+  gpus: 0
+  savefile: "rainnet_model"
+model:
+  rainnet:
+    input_shape: [512, 512, 4]
+    kernel_size: 3
+    mode: "regression"
+    conv_shape:
+      [
+        ["1", [4, 64]],
+        ["2", [64, 128]],
+        ["3", [128, 256]],
+        ["4", [256, 512]],
+        ["5", [512, 1024]],
+        ["6", [1536, 512]],
+        ["7", [768, 256]],
+        ["8", [384, 128]],
+        ["9", [192, 64]],
+      ]
+
+  loss:
+    name: "log_cosh"
+    kwargs: {}
+    discount_rate: 1.0
+  train_leadtimes: 1
+  display: 50
+  apply_differencing: true
+  lr: 1e-04
+prediction:
+  predict_leadtimes: 36
+  euler_transform_nworkers: 4
+  # Extrapolation keyword arguments
+  extrap_kwargs:
+    # Interpolation order, options
+    # 1 (linear).
+    # 0 (nearest neighbor)
+    # 3 (cubic)
+    interp_order: 3

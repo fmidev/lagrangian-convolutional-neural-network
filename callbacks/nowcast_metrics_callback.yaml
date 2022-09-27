@@ -1,0 +1,14 @@
+# Metrics configuration
+
+# thresholds in mm/h for categorical metrics
+thresholds : [01,05,10,20,30]
+
+# do we save metrics and plots to files too
+save_metrics : False
+
+# in which folder to save 
+save_folder : "saved_metrics"
+
+# Which sample dimensions to average metrics over
+reduce_dims : [0,2,3] 
+# here, B,H,W assuming B,T,H,W data

@@ -1,0 +1,31 @@
+data_source_name : fmi
+
+# platform specific paths
+datelist_path : "datelists/fmi_rainy_days_bbox.txt"
+hdf5_path : "measurements_db.hdf5"
+
+n_leadtimes : 
+
+input : 
+  num_next_files : 0
+
+save : 
+  save_indexes : [0]
+  group_format : "{timestamp}/{method}"
+  what_attrs : 
+    quantity : DBZH
+    gain : 0.5
+    offset : -32
+    nodata : 255
+    undetect : 255
+
+preprocessing : 
+  bbox : [125,637,604,1116]
+  nan_to_zero : True
+  downsampling : False
+  threshold : null
+
+nowcast : 
+  nowcast_method : "measurements"
+
+postprocessing : {}

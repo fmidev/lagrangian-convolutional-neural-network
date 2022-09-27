@@ -1,0 +1,59 @@
+# PLOT SCRIPT CONFIGURATION
+# where to save a copy of the config used
+config_copy_path : "results/{id}/{id}_config.yaml"
+
+### INPUT CONFIG ###
+metric_exp_ids : ["example_metric_exp_id"]
+# the path to the CSV file recording which metrics have been calculated, bad timestamps
+done_csv_path : "results/{id}/done_{id}.csv"
+# template path to the npy files recording the values of metrics that have been calculated
+metrics_npy_path : "results/{id}/{method}/{id}_{metric}_{method}.npy"
+# path to the text file containing metric names in order
+name_path : "results/{id}/{method}/{id}_{metric}_{method}_names.txt"
+# which metrics to plot? "CAT", "CONT", "FSS", "RAPSD", "INTENSITY_SCALE"
+metrics : ["CAT", "CONT", "RAPSD"]
+# which prediction method to plot? "t7-rn-msssim-lt5" could be
+methods:
+  example-prediction-id:
+    label: "Prediction name"
+    color: "#a6cee3"
+
+### OUTPUT CONFIG ###
+exp_id : "example_visualization_exp_id"
+# path template for where to save figures
+path_save : "results/{id}/{method}/{method}_{metric}.pdf"
+
+### PLOT CONFIG ###
+# leadtimes for which the metrics were calculated as units of timestep minutes
+timestep : 5
+leadtimes : [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]
+
+# data quality plot config
+dq_plot : 
+  # rotation of bar labels in deg
+  label_rot : 40
+
+# continuous metric plot config
+cont_plot : 
+# no hard-coded ylim
+  ylim_val : null
+
+# categorical metric plot config
+cat_plot : {}
+
+# fss metric plot config
+fss_plot : {}
+
+# RAPSD metric plot config
+rapsd_plot : 
+  subplot_kwargs : {}
+  lts : [3,6,12]
+  n_scales : 256
+
+# intensity scale metric plot config
+intensity_scale_plot:
+  subplot_kwargs: {}
+  thresh: [0.5, 1.0, 5.0, 10.0, 20.0, 30.0]
+  scales: [1.0, 2.0, 4.0, 8.0, 16.0]
+  kmperpixel: 1.0
+  vminmax: null

@@ -1,0 +1,85 @@
+# configurations for LCNN model
+
+# Parameters for training model
+train_params:
+  device: cpu
+  train_batch_size: 1
+  valid_batch_size: 1
+  test_batch_size: 1
+  predict_batch_size: 1
+  max_epochs: 100
+  # Max time used for training (days:hours:mins:secs)
+  max_time: "00:95:45:00"
+  # Validate after every n batches
+  val_check_interval: 1.0
+  num_workers: 10
+  gpus: 0
+  savefile: "lcnn-diff-rmse-30lt-20062022"
+  # many leadtimes
+  verif_leadtimes: 6
+  # number of batches to validate on
+  val_batches: 5000000
+  # number of baches to train on (per epoch)
+  train_batches: 5000000
+  early_stopping:
+    monitor: "val_loss"
+    patience: 5
+  lr_scheduler:
+    name: "reduce_lr_on_plateau"
+    kwargs:
+      mode: "min"
+      factor: 0.1
+      patience: 3
+
+model:
+  lr: 1e-04
+  rainnet:
+    input_shape: [4, 512, 512]
+    kernel_size: 3
+    mode: "regression"
+    conv_shape:
+      [
+        ["1", [4, 64]],
+        ["2", [64, 128]],
+        ["3", [128, 256]],
+        ["4", [256, 512]],
+        ["5", [512, 1024]],
+        ["6", [1536, 512]],
+        ["7", [768, 256]],
+        ["8", [384, 128]],
+        ["9", [192, 64]],
+      ]
+
+  loss:
+    name: "rmse"
+    kwargs:
+      alpha: 0.5
+    discount_rate: 0.0
+  train_leadtimes: 6
+  apply_differencing: true
+  display: 250
+prediction:
+  predict_leadtimes: 36
+  euler_transform_nworkers: 6
+  # Extrapolation keyword arguments
+  extrap_kwargs:
+    # Interpolation order, options
+    # 1 (linear).
+    # 0 (nearest neighbor)
+    # 3 (cubic)
+    interp_order: 3
+    allow_nonfinite_values: true
+prediction_output:
+  # Output directory
+  output_dir: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_diff_rmse_30lt_20062022
+  # Output filename format (can contain {common_time} to change time)
+  filename: lcnn_diff_rmse_30lt_20062022_36.h5
+  # where to save predictions in the HDF5 file
+  group_format: "{common_time:%Y-%m-%d %H:%M:%S}/lcnn-diff-rmse-30lt-20062022"
+  # Attributes of the dataset in the HDF5 file
+  what_attrs:
+    quantity: DBZH
+    gain: 0.5
+    offset: -32
+    nodata: 255
+    undetect: 0

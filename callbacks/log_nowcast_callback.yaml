@@ -1,0 +1,7 @@
+# Logging parameters
+
+# Display radar plot every {train_display} training step
+train_display : 50
+
+# Display radar plot on valid/test steps corresponding to batch_idxs' contained in {verif_display}
+verif_display : [0]

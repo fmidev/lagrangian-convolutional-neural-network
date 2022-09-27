@@ -1,0 +1,70 @@
+# unique identifier for metrics calculation experiment
+exp_id: "example_id"
+
+config_copy_path: "results/{id}/{id}_config.yaml"
+
+# the path to the CSV file recording which metrics have been calculated
+done_csv_path: "results/{id}/done_{id}.csv"
+
+# the path to the file containing logging output for the experiment
+logging_path: "results/{id}/{id}.log"
+
+# template path to the npy files recording the final values of metrics that have been calculated
+metrics_npy_path: "results/{id}/{method}/{id}_{metric}_{method}.npy"
+
+# path to the text file containing metric names in order
+name_path: "results/{id}/{method}/{id}_{metric}_{method}_names.txt"
+
+# template path for the npy file storing contigency tables recording partial metric calculations
+tables_path: "results/{id}/{method}/table_{method}.npy"
+
+# the path to the text file containing a list of timestamps to calculate metrics on
+timestamps_path: "datelists/fmi_rainy_days_bbox_test.txt"
+
+# which prediction method name to calculate the metrics on
+# and path to the predictions
+methods:
+  t7-rn-msssim-lt5:
+    path: "p4-rn-msssim-lt5.hdf5"
+# measurement path
+measurements:
+  path: "test_obs_512.hdf5"
+
+# leadtimes to calculate the metrics for as units of 5 minutes
+n_leadtimes: 36
+
+verbose: false
+# debugging flag, so that we don't try and go trough all the samples
+# set to False or integer (num of samples to pick)
+debugging: 16
+# If set to false, existing contingency tables will simply be used to compute metric values
+accumulate: True
+# number of chunks to divide the timestamps in for parallelization
+# for NO parallelization set to 0
+# otherwise set to a positive integer smalller than the number of test samples
+# recommended is to set equal or bigger to the number of available processing units
+n_chunks: 8
+n_workers: 1
+
+# if set to True, will mask all predictions the same, using "logical and" operation
+common_mask: False
+
+# which metrics to calculate,"FSS","INTENSITY_SCALE"
+metrics: ["CONT", "CAT", "RAPSD"]
+
+# optional metric-wise parameters
+metric_params:
+  # Continuous metrics to compute
+  cont_metrics: ["MAE", "ME"]
+  # categorical metrics to compute
+  cat_metrics: ["POD", "FAR", "CSI", "ETS"]
+  # thresholds for categorical, spatial metrics
+  thresh: [0.5, 1.0, 5.0, 10.0, 20.0, 30.0]
+  # scales for spatial metrics
+  scales: [1, 2, 4, 8, 16]
+  # RAPSD parameters
+  rapsd:
+    # leadtimes for which to calculate RAPSD
+    leadtimes: [3, 6, 12]
+    # input prediction size
+    im_size: [512, 512]

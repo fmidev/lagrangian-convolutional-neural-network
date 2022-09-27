@@ -1,0 +1,45 @@
+fmi:
+  # Absolute path to the list containing dates used for training, validation and testing
+  # The path can contain {split} that is replaced with train/test/valid
+  date_list: "datelists/fmi_rainy_days_bbox_{split}.txt"
+  # length of each block (number of 5-minute time steps)
+  len_date_block: 72
+  # path and filename can contain the following tokens:
+  # {year:*}, {month:*}, {day:*}, {hour:*}, {minute:*}, {second:*}
+  # Path to archive
+  # path: "/arch/radar/storage/{year}/{month:02d}/{day:02d}/fmi/radar/composite/lowest"
+  path: "/fmi/scratch/project_2005001/composites/FMI_5_6_h5_constant_v15062022/{year}/{month:02d}/{day:02d}"
+  # Filename format
+  filename: "{commontime:%Y%m%d%H%M}_SUOMI1_lagrangian.h5"
+  # filename: "{year}{month:02d}{day:02d}{hour:02d}{minute:02d}_fmi.radar.composite.lowest_FIN_SUOMI1.pgm.gz"
+  # Importer used to load composites, options: pgm_gzip
+  importer: lagrangian_h5
+  # Number of frames used as input
+  input_block_length: 5
+  # Number of frames that are predicted
+  prediction_block_length: 6
+  # Timestep of the data in minutes
+  timestep: 5
+  # Bounding box used as Python indices
+  # written as [x1, x2, y1, x2] that corresponds to image[x1:x2, y1:y2]
+  bbox: [604, 1116, 125, 637]
+  # bbox: null
+  # Original Image size
+  image_size: [1226, 760]
+  # image_size: [512, 512]
+  # Image size after bbox
+  # bbox_image_size: [1226, 760]
+  bbox_image_size: [512, 512]
+  # Input image size, can contain upsampling
+  input_image_size: [512, 512]
+  # input_image_size: [1226, 760]
+  # Upsampling method
+  upsampling_method: average
+  transform_to_grayscale: true
+  # Whether to apply differencing to the data.
+  # Note that if true, input block length is reduced by 1
+  apply_differencing: True
+  # data normalization method, options: log, log_unit, none
+  normalization_method: none
+  # Cut-off value for differenced mm/h values before transforming to [0,1] interval
+  log_unit_diff_cutoff: 250

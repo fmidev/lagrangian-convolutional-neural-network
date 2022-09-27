@@ -1,0 +1,8 @@
+**/__pycache__/*
+*.png
+*.csv
+*.code-workspace
+**/.vscode/*
+*.log
+*.json
+**/*.pyc

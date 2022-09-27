@@ -1,0 +1,100 @@
+# Configurations for plotting example nowcasts
+outdir: gif_figures
+figsize: [14.32, 14]
+filename: "case_nowcast_%Y%m%d%H%M.pdf"
+stylefile: presentation.mplstyle
+dpi: 600
+leadtimes:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  # - 18
+  # - 24
+  # - 30
+  # - 36
+n_input_images: 5
+min_val: 1.0
+# advection_field_path: "/data/PINCAST/manuscript_1/lagrangian_data/FMI_5_6_h5_constant_v15062022/%Y/%m/%d/%Y%m%d%H%M_SUOMI1_lagrangian.h5"
+# adv_field_bbox: [604, 1116, 125, 637]
+advection_field_path:
+adv_field_bbox:
+nowcasts:
+  # # LCNN logcosh
+  # lcnn-logcosh-30lt-17062022:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_logcosh_30lt_17062022/lcnn_logcosh_30lt_17062022_36.h5
+  #   title: "L-CNN logcosh"
+  # L-CNN-d RMSE
+  lcnn-diff-rmse-30lt-20062022:
+    path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_diff_rmse_30lt_20062022/lcnn_diff_rmse_30lt_20062022_36.h5
+    title: "L-CNN"
+  # Rainnet logcosh
+  # t11-rn-logcosh-lt30:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/rainnet-pytorch/datasetV3/p15-rn-logcosh-lt30.hdf5
+  #   title: "RainNet"
+  p24-rn-logcosh-lt30:
+    path: /data/PINCAST/manuscript_1/nowcasts/rainnet-pytorch/datasetV3/p24-rn-logcosh-lt30.hdf5
+    title: "RainNet"
+  #   # L-CNN logcosh with 1x1 kernel
+  # lcnn-logcosh-1x1-30lt:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_logcosh_1x1_30lt_07062022/lcnn_logcosh_1x1_30lt_07062022_36.h5
+  # # L-CNN difference logcosh
+  # lcnn-diff-logcosh-30lt-20062022:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_diff_logcosh_30lt_20062022/lcnn_diff_logcosh_30lt_20062022_36.h5
+  #   title: "L-CNN-D"
+  # # LCNN MS-SSIM
+  # lcnn-msssim-30lt-20062022:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_mssim_30lt_20062022/lcnn_mssim_30lt_20062022_36.h5
+  #   title: "L-CNN MS-SSIM"
+  # # LCNN-D MS-SSIM
+  # lcnn-diff-mssim-30lt-20062022:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_diff_mssim_30lt_20062022/lcnn_diff_mssim_30lt_20062022_36.h5
+  # # LCNN-D SSIM
+  # lcnn-diff-ssim-30lt-20062022:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_diff_ssim_30lt_20062022/lcnn_diff_ssim_30lt_20062022_36.h5
+  #   title: "L-CNN-D MS-SSIM"
+  # # Rainnet MS-SSIM
+  # t13-rn-msssim-lt30:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/rainnet-pytorch/datasetV3/p17-rn-msssim-lt30.hdf5
+  #   title: "RainNet MS-SSIM"
+  # # LCNN MS-SSIM
+  # lcnn-msssim-30lt:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/lcnn/lcnn_mssim_30lt_23052022/lcnn_mssim_30lt_23052022_36.h5
+  # # LCNN-D MS-SSIM v2
+  # lcnn-diff-mssim-30lt-01062022:
+  #   path: nowcasts/lcnn/lcnn_diff_mssim_30lt_01062022/lcnn_diff_mssim_30lt_01062022_36.h5
+  # # LCNN-D MS-SSIM with new K values
+  # lcnn-diff-mssim-30lt-10062022:
+  #   path: nowcasts/lcnn/lcnn_diff_mssim_30lt_10062022/lcnn_diff_mssim_30lt_10062022_36.h5
+  # Rainnet MS-SSIM
+  # t13-rn-msssim-lt30:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/rainnet-pytorch/datasetV3/p17-rn-msssim-lt30.hdf5
+  # ANVIL
+  # anvil:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p13_anvil.hdf5
+  # # LINDA domain
+  # LINDA domain
+  linda:
+    path: /data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p24_linda_lcnn_cases.hdf5
+    title: "LINDA"
+  # extrapolation
+  extrapolation:
+    # path: /data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p13_extrapolation.hdf5
+    path: /data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p24_extrapolation_lcnn_cases.hdf5
+    title: "Extrapolation"
+  # # SPROG
+  # sprog:
+  #   path: /data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p18_sprog.hdf5
+
+# measurement path
+measurements:
+  path: "/data/PINCAST/manuscript_1/nowcasts/measurements/test_obs_512.hdf5"
+  offset: 0
