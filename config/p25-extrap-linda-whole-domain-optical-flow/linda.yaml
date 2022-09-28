@@ -1,0 +1,53 @@
+data_source_name : fmi
+
+# platform specific paths
+datelist_path : "datelists/fmi_rainy_days_bbox_test.txt"
+hdf5_path : "/data/PINCAST/manuscript_1/nowcasts/pysteps/datasetV3/p25_linda_lcnn_test_swap.hdf5"
+
+input : 
+  # how many radar images to load after the first one?
+  num_next_files : 3
+
+save : 
+  # which prediction indices to save?
+  save_indexes : [0,1,2,3,4,5,6,7,8,9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35] 
+  group_format : "{timestamp}/{method}"
+  what_attrs : 
+    quantity : DBZH
+    gain : 0.5
+    offset : -32
+    nodata : 255
+    undetect : 255
+
+preprocessing : 
+  db_transform : false
+  threshold : 0.1
+  zerovalue : 0.0
+  nan_to_zero : True
+  downscaling : 1.0
+  convert : True
+
+nowcast : 
+  nowcast_method : "linda"
+  bbox : [125,637,604,1116]
+  oflow_method : "lucaskanade"
+  sample_slice : [-3, null, null]
+  oflow_slice : [0, null, 1]
+  n_leadtimes : 36
+  
+  oflow_params : {} 
+  nowcast_params : 
+    add_perturbations : false
+    num_workers : 20
+    use_multiprocessing : true
+    extrap_kwargs :
+        interp_order : 3
+
+
+postprocessing : 
+  convert : True
+  db_transform : false
+  threshold : 0.1
+  zerovalue : 0.0
+  nan_to_zero : False
+

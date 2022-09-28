@@ -1,0 +1,67 @@
+#    
+#   OPTICAL FLOW CALCULATED BEFORE BBOX HERE
+#
+
+data_source_name : fmi
+
+# platform specific paths
+datelist_path : "../../datelists/fmi_rainy_days_bbox_test.txt"
+hdf5_path : "prediction_db_vet.hdf5"
+
+input : 
+  # how many radar images to load after the first one?
+  num_next_files : 1
+
+save : 
+  # which prediction indices to save?
+  save_indexes : [0,1,2,3,4,5,6,7,8,9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35] 
+  group_format : "{timestamp}/{method}"
+  what_attrs : 
+    quantity : DBZH
+    gain : 0.5
+    offset : -32
+    nodata : 255
+    undetect : 255
+
+preprocessing :
+  # do we convert dBZ -> mm/h 
+  convert : True
+  # do we transform mm/h RR into dB units? (only applicable if convert : true)
+  db_transform : false
+  # threshold for radar sequences (mm/h or dBZ depending on if convert is true)
+  # values below will be set to metadata zerovalue or that set below in case of dB transform
+  threshold : 0.1
+  # zerovalue to be set in potential dB transform
+  zerovalue : 15.0
+  # convert NaN values of the input data to zeros indicated by metadata
+  nan_to_zero : True
+  # factor by which to downscale input data 
+  downscaling : 1.0
+
+
+nowcast : 
+  # bounding box for data, in pixels
+  bbox : [125,637,604,1116]
+  
+  nowcast_method : "extrapolation"
+  oflow_method : "lucaskanade"
+  sample_slice : [-1, null, null]
+  oflow_slice : [0, -1, 1]
+  n_leadtimes : 36
+  
+  oflow_params : {} 
+  nowcast_params : {}
+
+postprocessing : 
+  # do we backtransform from dB units
+  db_transform : false
+  # threshold (dBR, R, or dBZ) under which zerovalue is
+  # assigned from zerovalue below
+  threshold : -10.0
+  # zerovalue to be set (R or dBZ)
+  zerovalue : 0.0
+  # before saving, set all NaNs to above zerovalue too
+  nan_to_zero : True
+  # convert back from mm/h to dBZ (set to true in case it is true in preprocessing too)
+  convert : True
+
