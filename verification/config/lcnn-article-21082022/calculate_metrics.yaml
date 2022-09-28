@@ -28,42 +28,16 @@ methods:
   # L-CNN-d RMSE
   lcnn-diff-rmse-30lt-20062022:
     path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_diff_rmse_30lt_20062022/lcnn_diff_rmse_30lt_20062022_36.h5
-  # L-CNN-d logcosh
-  # lcnn-diff-logcosh-30lt-20062022:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_diff_logcosh_30lt_20062022/lcnn_diff_logcosh_30lt_20062022_36.h5
-  # # L-CNN logcosh
-  # lcnn-logcosh-30lt-17062022:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_logcosh_30lt_17062022/lcnn_logcosh_30lt_17062022_36.h5
-  # # L-CNN logcosh with 1x1 kernel
-  # lcnn-logcosh-1x1-30lt:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_logcosh_1x1_30lt_07062022/lcnn_logcosh_1x1_30lt_07062022_36.h5
-  # LCNN MS-SSIM
-  # lcnn-msssim-30lt-20062022:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_mssim_30lt_20062022/lcnn_mssim_30lt_20062022_36.h5
-  # # LCNN-D MS-SSIM
-  # lcnn-diff-mssim-30lt-20062022:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_diff_mssim_30lt_20062022/lcnn_diff_mssim_30lt_20062022_36.h5
-  # # LCNN-D SSIM
-  # lcnn-diff-ssim-30lt-20062022:
-  #   path: /fmi/scratch/project_2005001/nowcasts/lcnn/lcnn_diff_ssim_30lt_20062022/lcnn_diff_ssim_30lt_20062022_36.h5
   # Rainnet logcosh
   t11-rn-logcosh-lt30:
     path: /fmi/scratch/project_2005001/nowcasts/rainnet-pytorch/p15-rn-logcosh-lt30.hdf5
-  # # Rainnet MS-SSIM
-  # t13-rn-msssim-lt30:
-  #   path: /fmi/scratch/project_2005001/nowcasts/rainnet-pytorch/p17-rn-msssim-lt30.hdf5
   # extrapolation
   extrapolation:
     path: /fmi/scratch/project_2005001/nowcasts/pysteps/p25_extrapolation_lcnn_test_swap.hdf5
-  # # ANVIL
-  # anvil:
-  #   path: /fmi/scratch/project_2005001/nowcasts/pysteps/p13_anvil.hdf5
   # LINDA domain
   linda:
     path: /fmi/scratch/project_2005001/nowcasts/pysteps/p25_linda_lcnn_test_swap.hdf5
-  # # SPROG
-  # sprog:
-  #   path: /fmi/scratch/project_2005001/nowcasts/pysteps/p18_sprog.hdf5
+
 
 # measurement path
 measurements:

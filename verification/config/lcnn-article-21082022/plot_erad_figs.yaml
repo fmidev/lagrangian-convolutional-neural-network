@@ -15,47 +15,14 @@ metrics: ["CAT", "FSS"] #, "INTENSITY_SCALE"]
 # metrics: ["CONT"]
 
 methods:
-  # lcnn-logcosh-30lt-17062022:
-  #   label: "L-CNN logcosh"
-  #   color: "#1b9e77"
-  #   linestyle: "solid"
-  # # lcnn-logcosh-1x1-30lt:
-  # #   label: "L-CNN logcosh 1x1"
-  # #   color: "#1b9e77"
-  # #   linestyle: "dotted"
-  # # # LCNN MS-SSIM
-  # # lcnn-msssim-30lt-20062022:
-  # #   label: "L-CNN MS-SSIM"
-  # #   color: "#1b9e77"
-  # #   linestyle: "solid"
-  # lcnn-diff-logcosh-30lt-20062022:
-  #   label: "L-CNN-D logcosh"
-  #   color: "#d95f02"
-  #   linestyle: "solid"
   lcnn-diff-rmse-30lt-20062022:
     label: "L-CNN"
     color: "#02B8CE"
     linestyle: "solid"
-  # lcnn-diff-mssim-30lt:
-  #   label: "L-CNN-D MS-SSIM 1000"
-  #   color: "#d95f02"
-  #   linestyle: "dashdot"
-  # lcnn-diff-mssim-30lt-20062022:
-  #   label: "L-CNN-D MS-SSIM"
-  #   color: "#d95f02"
-  #   linestyle: "dotted"
-  # lcnn-diff-ssim-30lt-20062022:
-  #   label: "L-CNN-D SSIM"
-  #   color: "#d95f02"
-  #   linestyle: "dashdot"
   t11-rn-logcosh-lt30:
     label: "RainNet"
     color: "#303193"
     linestyle: "dashed"
-  # t13-rn-msssim-lt30:
-  #   label: "RainNet MS-SSIM"
-  #   color: "#7570b3"
-  #   linestyle: "solid"
   linda:
     label: "LINDA"
     color: "#000"

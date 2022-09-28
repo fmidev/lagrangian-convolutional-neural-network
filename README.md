@@ -9,7 +9,7 @@ The workflow for replicating the results in the article is roughly:
 3. [Create nowcasts for the L-CNN model.](#creating-nowcasts-for-the-l-cnn-model)
 4. Create the reference model nowcasts
    1. Train the RainNet model and run nowcasts for it. See the accompanying repository `<LINK>` for details.
-   1. Create nowcasts for the LINDA and extrapolation nowcast models. See [`verification/replication.md`](verification/replication.md) for instructions.
+   1. Create nowcasts for the LINDA and extrapolation nowcast models. See [`verification/replication.md`](verification/replication.md) for instructions and [`config/p25-extrap-linda-whole-domain-optical-flow`](config/p25-extrap-linda-whole-domain-optical-flow) for configuration files.
 5. [Run verification statistics computation and visualize the results.](#running-verification-results)
 
 ## Scripts
