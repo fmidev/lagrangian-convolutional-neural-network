@@ -1,6 +1,8 @@
 # L-CNN model development and analysis
 
-This repository contains the source code for the article _Advection-free Convolutional Neural Network for Convective Rainfall Nowcasting_ by Jenna Ritvanen, Bent Harnist, Miguel Aldana, Terhi Mäkinen, and Seppo Pulkkinen. For complete documentation of the L-CNN method, refer to the article.
+This repository contains the source code for the article _Advection-free Convolutional Neural Network for Convective Rainfall Nowcasting_ by Jenna Ritvanen, Bent Harnist, Miguel Aldana, Terhi Mäkinen, and Seppo Pulkkinen, submitted to _IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing_.
+
+For documentation of the L-CNN method, refer to the article. For questions related to the code, contact Jenna Ritvanen (jenna.ritvanen[at]fmi.fi).
 
 The workflow for replicating the results in the article is roughly:
 
@@ -8,8 +10,8 @@ The workflow for replicating the results in the article is roughly:
 2. [Train the L-CNN model.](#training-the-l-cnn-model)
 3. [Create nowcasts for the L-CNN model.](#creating-nowcasts-for-the-l-cnn-model)
 4. Create the reference model nowcasts
-   1. Train the RainNet model and run nowcasts for it. See the accompanying repository `<LINK>` for details.
-   1. Create nowcasts for the LINDA and extrapolation nowcast models. See [`verification/replication.md`](verification/replication.md) for instructions and [`config/p25-extrap-linda-whole-domain-optical-flow`](config/p25-extrap-linda-whole-domain-optical-flow) for configuration files.
+   1. Train the RainNet model and run nowcasts for it. See the accompanying repository [fmidev/rainnet](https://github.com/fmidev/rainnet) for details.
+   2. Create nowcasts for the LINDA and extrapolation nowcast models. See [`verification/replication.md`](verification/replication.md) for instructions and [`config/p25-extrap-linda-whole-domain-optical-flow`](config/p25-extrap-linda-whole-domain-optical-flow) for configuration files.
 5. [Run verification statistics computation and visualize the results.](#running-verification-results)
 
 ## Scripts
