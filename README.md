@@ -2,6 +2,8 @@
 
 This repository contains the source code for the article _Advection-free Convolutional Neural Network for Convective Rainfall Nowcasting_ by Jenna Ritvanen, Bent Harnist, Miguel Aldana, Terhi Mäkinen, and Seppo Pulkkinen, submitted to _IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing_.
 
+[![DOI](https://zenodo.org/badge/541975069.svg)](https://zenodo.org/badge/latestdoi/541975069)
+
 For documentation of the L-CNN method, refer to the article. For questions related to the code, contact Jenna Ritvanen (jenna.ritvanen[at]fmi.fi).
 
 The workflow for replicating the results in the article is roughly:
