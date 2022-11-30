@@ -6,4 +6,5 @@ authors:
     orcid: https://orcid.org/0000-0002-0662-0839
 title: fmidev/lagrangian-convolutional-neural-network: Revised version of L-CNN model code
 version: lcnn-v1.1
+doi: 10.5281/zenodo.7380116
 date-released: 2022-11-30
