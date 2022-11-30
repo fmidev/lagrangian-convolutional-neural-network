@@ -43,7 +43,7 @@ QTY_RANGES = {
     "SNR": (-30.0, 50.0),
     "LOG": (0.0, 50.0),
     "RR": (1.0, 10.0),
-    "RR_diff": (-5.0, 5.0),
+    "RR_diff": (-10.0, 10.0),
 }
 
 COLORBAR_TITLES = {
@@ -60,7 +60,7 @@ COLORBAR_TITLES = {
     "SNR": "Signal-to-noise ratio (dB)",
     "LOG": "LOG signal-to-noise ratio (dB)",
     "RR": "Rain rate [mm h$^{-1}$]",
-    "RR_diff": "Rain rate [mm h$^{-1}$]",
+    "RR_diff": "Rain rate difference [mm h$^{-1}$]",
 }
 
 
@@ -126,7 +126,15 @@ def plot_1h_plus_1h_timeseries(model, dataset, indices=[10, 529]):
             )
 
 
-def plot_array(ax, arr, colorbar=True, qty="DBZH", cmap=None, norm=None, extend="max"):
+def plot_array(
+    ax,
+    arr,
+    colorbar=True,
+    qty="DBZH",
+    cmap=None,
+    norm=None,
+    extend="max",
+):
     """Plot an array with pcolormesh to axis.
 
     Parameters
@@ -357,7 +365,7 @@ def _get_colormap(quantity):
         bounds = np.arange(
             QTY_RANGES[quantity][0],
             QTY_RANGES[quantity][1] + 0.1,
-            0.5,
+            1.0,
         )
         cmap = plt.get_cmap(cmap, len(bounds))
         norm = mpl.colors.BoundaryNorm(boundaries=bounds, ncolors=len(bounds))
