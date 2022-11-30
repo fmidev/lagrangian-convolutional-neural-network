@@ -280,10 +280,10 @@ class LagrangianFMIComposite(Dataset):
             return data
 
     def postprocessing(self, data_in: np.ndarray):
+        data = torch.Tensor(data_in)
         if self.transform_to_grayscale:
             # data of shape (window_size, im.shape[0], im.shape[1])
             # dbZ to mm/h
-            data = torch.Tensor(data_in)
             data = 10 ** (data * 0.1)
             data = (data / 223) ** (1 / 1.53)  # fixed
 
