@@ -14,6 +14,8 @@ from datetime import datetime
 
 from pathlib import Path
 
+import contextily as ctx
+
 from utils import plot_array, load_config, read_advection_fields_from_h5
 from verification.pincast_verif import io_tools
 
@@ -43,8 +45,23 @@ if __name__ == "__main__":
     nrows = 2 + len(conf.nowcasts.keys())
     ncols = max(len(conf.leadtimes), conf.n_input_images)
 
+    # Map parameters
+    if conf.plot_map:
+        _ = ctx.bounds2raster(
+            *conf.map_params.bbox_lonlat,
+            ll=True,
+            path="map.tif",
+            zoom=conf.map_params.zoom,
+            source=ctx.providers.Stamen.TonerLite,
+        )
+        map_im = plt.imread("map.tif")
+
     fig, axes = plt.subplots(
-        nrows=nrows, ncols=ncols, figsize=conf.figsize, sharex="col", sharey="row"
+        nrows=nrows,
+        ncols=ncols,
+        figsize=conf.figsize,
+        sharex="row",
+        sharey="col",
     )
 
     dbs = dict()
@@ -87,11 +104,27 @@ if __name__ == "__main__":
     # Plot input
     for i in range(conf.n_input_images):
         obs[i][obs[i] < conf.min_val] = np.nan
+        nan_mask = np.isnan(obs[i])
 
         cbar = plot_array(
             axes[0, i], obs[i], qty="RR", colorbar=(i == conf.n_input_images - 1)
         )
         axes[0, i].set_title(times[i][:-3])
+
+        axes[0, i].pcolormesh(
+            np.zeros_like(obs[0]),
+            cmap=colors.ListedColormap(
+                [
+                    "white",
+                    "tab:gray",
+                ]
+            ),
+            zorder=9,
+            rasterized=True,
+            vmin=0,
+            vmax=1,
+            alpha=0.5,
+        )
 
         # Plot advection field
         if adv_field is not None:
@@ -103,6 +136,11 @@ if __name__ == "__main__":
                 linewidth=adv_field_lw,
                 color=adv_field_color,
                 alpha=adv_field_alpha,
+            )
+
+        if conf.plot_map:
+            axes[0, i].imshow(
+                map_im, zorder=0, extent=[0, obs[0].shape[0], 0, obs[0].shape[1]]
             )
 
     cbar.ax.yaxis.label.set_size("x-small")
@@ -121,6 +159,21 @@ if __name__ == "__main__":
         plot_array(axes[1, i], obs[conf.n_input_images + i], qty="RR", colorbar=False)
         axes[1, i].set_title(f"{date:%Y-%m-%d %H:%M} + {conf.leadtimes[i] * 5:>3} min ")
 
+        axes[1, i].pcolormesh(
+            np.zeros_like(obs[0]),
+            cmap=colors.ListedColormap(
+                [
+                    "white",
+                    "tab:gray",
+                ]
+            ),
+            zorder=9,
+            rasterized=True,
+            vmin=0,
+            vmax=1,
+            alpha=0.5,
+        )
+
         # Plot advection field
         if adv_field is not None:
             axes[1, i].quiver(
@@ -131,6 +184,10 @@ if __name__ == "__main__":
                 linewidth=adv_field_lw,
                 color=adv_field_color,
                 alpha=adv_field_alpha,
+            )
+        if conf.plot_map:
+            axes[1, i].imshow(
+                map_im, zorder=0, extent=[0, obs[0].shape[0], 0, obs[0].shape[1]]
             )
 
     axes[1, 0].set_ylabel("Target")
@@ -151,9 +208,21 @@ if __name__ == "__main__":
 
         for i in range(len(conf.leadtimes)):
             nan_mask = np.isnan(nowcasts[method][i])
-            nowcasts[method][i][nowcasts[method][i] < conf.min_val] = np.nan
 
-            plot_array(axes[j + 2, i], nowcasts[method][i], qty="RR", colorbar=False)
+            if conf.plot_diff:
+                arr = nowcasts[method][i] - obs[conf.n_input_images + i]
+                plot_array(
+                    axes[j + 2, i],
+                    arr,
+                    qty="RR_diff",
+                    colorbar=(i == ncols - 1),
+                    extend="both",
+                )
+            else:
+                nowcasts[method][i][nowcasts[method][i] < conf.min_val] = np.nan
+                plot_array(
+                    axes[j + 2, i], nowcasts[method][i], qty="RR", colorbar=False
+                )
             axes[j + 2, i].pcolormesh(
                 np.flipud(nan_mask),
                 cmap=colors.ListedColormap(
@@ -184,8 +253,16 @@ if __name__ == "__main__":
                     color=adv_field_color,
                     alpha=adv_field_alpha,
                 )
+            if conf.plot_map:
+                axes[j + 2, i].imshow(
+                    map_im, zorder=0, extent=[0, obs[0].shape[0], 0, obs[0].shape[1]]
+                )
 
         axes[j + 2, 0].set_ylabel(conf.nowcasts[method]["title"])
+
+    if conf.plot_map:
+        COPYRIGHT_TEXT = "Map tiles by Stamen Design, under CC BY 3.0. Map data by OpenStreetMap, under ODbL."
+        fig.text(0.99, -0.005, COPYRIGHT_TEXT, fontsize=4, zorder=10, ha="right")
 
     for ax in axes.flat:
         ax.set_xticks(np.linspace(0, obs[0].shape[0], 5))

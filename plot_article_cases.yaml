@@ -3,7 +3,7 @@ outdir: article_figures_new
 figsize: [14.32, 14]
 filename: "case_nowcast_%Y%m%d%H%M.pdf"
 stylefile: article.mplstyle
-dpi: 600
+dpi: 300
 leadtimes:
   # - 1
   - 2
@@ -27,6 +27,15 @@ min_val: 1.0
 # adv_field_bbox: [604, 1116, 125, 637]
 advection_field_path:
 adv_field_bbox:
+plot_diff: false
+plot_map: true
+map_params:
+  proj: "+proj=stere +a=6371288 +lon_0=25E +lat_0=90N +lat_ts=60 +x_0=380886.310 +y_0=3395677.920 +no_defs"
+  # Bounding box of images as
+  # east, south, west, north
+  bbox_lonlat: [20.55552, 59.00874, 30.28017, 63.62105]
+  # Zoom level of map
+  zoom: 7
 nowcasts:
   # L-CNN-d RMSE
   lcnn-diff-rmse-30lt-20062022:
