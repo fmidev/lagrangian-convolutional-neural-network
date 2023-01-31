@@ -1,6 +1,6 @@
 # L-CNN model development and analysis
 
-This repository contains the source code for the article _Advection-free Convolutional Neural Network for Convective Rainfall Nowcasting_ by Jenna Ritvanen, Bent Harnist, Miguel Aldana, Terhi Mäkinen, and Seppo Pulkkinen, submitted to _IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing_.
+This repository contains the source code for the article [_Advection-free Convolutional Neural Network for Convective Rainfall Nowcasting_](https://doi.org/10.1109/JSTARS.2023.3238016) by Jenna Ritvanen, Bent Harnist, Miguel Aldana, Terhi Mäkinen, and Seppo Pulkkinen, published in _IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing_.
 
 [![DOI](https://zenodo.org/badge/541975069.svg)](https://zenodo.org/badge/latestdoi/541975069)
 
