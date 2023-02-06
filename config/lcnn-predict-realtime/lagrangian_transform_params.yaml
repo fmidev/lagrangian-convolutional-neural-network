@@ -35,7 +35,7 @@ oflow_params:
     interp_order: 3
 
 output:
-  path: "/output/lagrangian_data/{year}/{month:02d}/{day:02d}"
+  path: "/output/lagrangian_data"
   filename: "{commontime:%Y%m%d%H%M}_SUOMI1_lagrangian.h5"
   fig_path: "figures-4-6"
   display_freq: 50

@@ -1,14 +1,14 @@
 fmi:
   # Absolute path to the list containing dates used for training, validation and testing
   # The path can contain {split} that is replaced with train/test/valid
-  date_list: "datelists/fmi_rainy_days_bbox_{split}.txt"
+  date_list: "datelists/{split}.txt"
   # length of each block (number of 5-minute time steps)
   len_date_block: 5
   # path and filename can contain the following tokens:
   # {year:*}, {month:*}, {day:*}, {hour:*}, {minute:*}, {second:*}
   # Path to archive
   # path: "/arch/radar/storage/{year}/{month:02d}/{day:02d}/fmi/radar/composite/lowest"
-  path: "/output/lagrangian_data/{year}/{month:02d}/{day:02d}"
+  path: "/output/lagrangian_data"
   # Filename format
   filename: "{commontime:%Y%m%d%H%M}_SUOMI1_lagrangian.h5"
   # filename: "{year}{month:02d}{day:02d}{hour:02d}{minute:02d}_fmi.radar.composite.lowest_FIN_SUOMI1.pgm.gz"
