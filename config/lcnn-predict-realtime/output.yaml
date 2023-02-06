@@ -1,0 +1,8 @@
+# Configurations related to output
+logging:
+  level: info
+  format: "[%(levelname)s]%(asctime)s:%(filename)s:%(funcName)s:%(lineno)s: %(message)s"
+  dateformat: "%Y/%m/%d %H:%M"
+  path: "output/logs"
+  filename: "{year}{month:02d}{day:02d}{hour:02d}{minute:02d}{second:02d}.log"
+  # filename:
