@@ -19,12 +19,22 @@ class LagrangianFMICompositeDataModule(pl.LightningDataModule):
 
     def setup(self, stage):
         # called on every GPU
-        self.train_dataset = LagrangianFMIComposite(split="train", **self.dsconfig.fmi)
-        self.valid_dataset = LagrangianFMIComposite(split="valid", **self.dsconfig.fmi)
-        self.test_dataset = LagrangianFMIComposite(split="test", **self.dsconfig.fmi)
-        self.predict_dataset = LagrangianFMIComposite(
-            split=self.predict_list, predicting=True, **self.dsconfig.fmi
-        )
+        if stage == "train":
+            self.train_dataset = LagrangianFMIComposite(
+                split="train", **self.dsconfig.fmi
+            )
+        if stage == "val":
+            self.valid_dataset = LagrangianFMIComposite(
+                split="valid", **self.dsconfig.fmi
+            )
+        if stage == "test":
+            self.test_dataset = LagrangianFMIComposite(
+                split="test", **self.dsconfig.fmi
+            )
+        if stage == "predict":
+            self.predict_dataset = LagrangianFMIComposite(
+                split=self.predict_list, predicting=True, **self.dsconfig.fmi
+            )
 
     def train_dataloader(self):
         train_loader = DataLoader(
