@@ -99,6 +99,8 @@ class FMIComposite(Dataset):
 
         # Get correct importer function
         if importer == "pgm_gzip":
+            self.importer = read_pgm_gzip_composite
+        if importer == "pgm":
             self.importer = read_pgm_composite
         else:
             raise NotImplementedError(f"Importer {importer} not implemented!")
@@ -226,9 +228,20 @@ class FMIComposite(Dataset):
         return self.windows[index, ...]
 
 
-def read_pgm_composite(filename, no_data_value=-32):
+def read_pgm_gzip_composite(filename, no_data_value=-32):
     """Read PGM composite."""
     data = imread(gzip.open(filename, "r"))
+    mask = data == 255
+    data = data.astype(np.float64)
+    data = (data - 64.0) / 2.0
+    data[mask] = no_data_value
+
+    return data
+
+
+def read_pgm_composite(filename, no_data_value=-32):
+    """Read PGM composite."""
+    data = imread(filename)
     mask = data == 255
     data = data.astype(np.float64)
     data = (data - 64.0) / 2.0

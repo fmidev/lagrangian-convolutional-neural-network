@@ -31,3 +31,4 @@ dependencies:
   - tqdm
   - cmcrameri
   - opencv
+  - sh
