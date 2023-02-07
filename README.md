@@ -18,13 +18,14 @@ The workflow for replicating the results in the article is roughly:
 
 ## Scripts
 
-| Script                                     | Description                                                                                                                                                                                                                      |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transform_fmi_composite_to_lagrangian.py` | Script for transforming FMI radar composite to Lagrangian coordinates. Reads parameters from `lagrangian_transform_datasets.yaml` and `lagrangian_transform_params.yaml` configuration files.                                    |
-| `train_model.py`                           | Script for training the L-CNN model. Dataset parameters read from `lagrangian_datasets.yaml` and model parameters from `lcnn.yaml`.                                                                                              |
-| `predict_model.py`                         | Script for producing predictions from the `datelists/fmi_rainy_days_bbox_predict.txt` datelist. Dataset parameters read from `lagrangian_datasets.yaml` and model parameters from `lcnn.yaml`.                                   |
-| `plot_example_nowcasts.py`                 | Script for plotting example nowcasts. Input parameters nowcast time and config file name.                                                                                                                                        |
-| `plot_example_nowcasts_gif.py`             | Script for plotting example nowcasts as GIF animations. Input parameters nowcast time and config file name. Config file has same structure as `plot_example_nowcasts.py`, but output filename and figure size are not respected. |
+| Script                                     | Description                                                                                                                                                                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `transform_fmi_composite_to_lagrangian.py` | Script for transforming FMI radar composite to Lagrangian coordinates. Reads parameters from `lagrangian_transform_datasets.yaml` and `lagrangian_transform_params.yaml` configuration files.                                                                |
+| `train_model.py`                           | Script for training the L-CNN model. Dataset parameters read from `lagrangian_datasets.yaml` and model parameters from `lcnn.yaml`.                                                                                                                          |
+| `predict_model.py`                         | Script for producing predictions from the `datelists/fmi_rainy_days_bbox_predict.txt` datelist. Dataset parameters read from `lagrangian_datasets.yaml` and model parameters from `lcnn.yaml`.                                                               |
+| `plot_example_nowcasts.py`                 | Script for plotting example nowcasts. Input parameters nowcast time and config file name.                                                                                                                                                                    |
+| `plot_example_nowcasts_gif.py`             | Script for plotting example nowcasts as GIF animations. Input parameters nowcast time and config file name. Config file has same structure as `plot_example_nowcasts.py`, but output filename and figure size are not respected.                             |
+| `create_nowcast.py`                        | Script for creating a nowcast for a single timestep with the L-CNN model. Input parameters are the timestep, configuration sub-directory, path to the model checkpoint, number of workers for data transform, and path to the datelist file that is written. |
 
 ## Creating Lagrangian datasets
 
@@ -90,7 +91,7 @@ The L-CNN model is run with the `predict_model.py` script. The script is going t
 - [`nowcast_metrics_callback.yaml`](config/lcnn-rmse-train-30lt/nowcast_metrics_callback.yaml) for verification metrics calculated during training
 - [`output.yaml`](config/lcnn-rmse-train-30lt/output.yaml) for random logging outputs
 
-In SLURM-based machines, the training can be run with e.g.
+In SLURM-based machines, the prediction can be run with e.g.
 
 ```bash
 #!/bin/bash
