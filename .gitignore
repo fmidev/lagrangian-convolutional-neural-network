@@ -6,3 +6,5 @@
 *.log
 *.json
 **/*.pyc
+**/hparams.yaml
+**/logs/**/*

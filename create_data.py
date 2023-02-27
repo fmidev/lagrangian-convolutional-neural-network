@@ -1,11 +1,11 @@
-"""Create a nowcast for the given timestamp.
+"""Create a timeseries of Lagrangian input data for the given timestamp.
 
 Usage:
-    python create_nowcast.py <timestamp> <config> --model-path <path-to-checkpoint> --datelist-path <datelist_path>
+    python create_data.py <timestamp> <config> --nworkers <nworkers> --datelist-path <datelist_path>
 
 Example:
 -------
-    python create_nowcast.py 202003011200 lcnn-predict-realtime --model-path /checkpoints/epoch=6-step=95480.ckpt --datelist-path datelists/realtime.txt
+    python create_data.py 202003011200 lcnn-predict-realtime --nworkers 1 --datelist-path datelists/realtime.txt
 
 Author: Jenna Ritvanen <jenna.ritvanen@fmi.fi>
 
@@ -23,12 +23,7 @@ if __name__ == "__main__":
     )
     argparser.add_argument("timestamp", type=str, help="Nowcast timestamp (YYYYMMDDHH)")
     argparser.add_argument("config", type=str, help="Configuration folder sub-path")
-    argparser.add_argument(
-        "--model-path",
-        type=str,
-        default="/checkpoints/epoch=6-step=95480.ckpt",
-        help="Path to model checkpoint",
-    )
+    argparser.add_argument("--nworkers", type=int, default=1, help="Number of workers")
     argparser.add_argument(
         "--datelist-path",
         type=str,
@@ -43,14 +38,12 @@ if __name__ == "__main__":
     times = pd.date_range(end=timestamp, freq="5T", periods=5)
     times.to_series().to_csv(datelist_path, index=False, header=False)
 
-    model_path = Path(args.model_path).resolve()
-
-    # Create nowcast
-    # python predict_model.py /models/epoch\=6-step\=95480.ckpt lcnn-predict-realtime -l realtime
+    # Create input data
+    # python transform_fmi_composite_to_lagrangian.py lcnn-predict-realtime realtime --nworkers 1
     proc = sh.python(
-        "predict_model.py",
-        model_path,
+        "transform_fmi_composite_to_lagrangian.py",
         args.config,
-        "-l",
         "realtime",
+        "--nworkers",
+        args.nworkers,
     )
