@@ -1,0 +1,47 @@
+precip_threshold_dbz: 8
+precip_threshold_mmh: 0.1
+
+rainrate_conversion:
+  a: 223
+  b: 1.53
+
+oflow_params:
+  # Method name from pysteps
+  oflow_method: "lucaskanade"
+  # How many fields to use for optical flow
+  oflow_history_length: 4
+  # Whether advection field should be updated
+  update_advfield: false
+  # Parameters for different methods
+  lucaskanade:
+    fd_method: "shitomasi"
+    # fd_kwargs:
+    #   min_sigma: 2.
+    #   max_sigma: 10.
+    #   threshold: 0.1
+    #   overlap: 0.5
+    # lk_kwargs:
+    #   winsize: [15, 15]
+    # decl_scale: 10
+    # interp_kwargs:
+    #   epsilon: 5.0
+
+  # Parameters for extrapolation
+  extrap_kwargs:
+    # Interpolation order, options
+    # 1 (linear).
+    # 0 (nearest neighbor)
+    # 3 (cubic)
+    interp_order: 3
+
+output:
+  path: "/output/lagrangian_data"
+  filename: "{commontime:%Y%m%d%H%M}_SUOMI1_lagrangian.h5"
+  fig_path: "figures-4-6"
+  display_freq: 50
+  # Config values for packing data
+  n_bits: 16
+  min_val_dBZ: 0
+  max_val_dBZ: 95
+  min_val_advfield: -10
+  max_val_advfield: 10

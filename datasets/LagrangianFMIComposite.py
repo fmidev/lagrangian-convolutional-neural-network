@@ -300,8 +300,12 @@ class LagrangianFMIComposite(Dataset):
 
         # Divide to input & output
         # Use output frame number, since that is constant whether we apply differencing or not
-        inputs = data[: -self.num_frames_output, ...].permute(0, 1, 2).contiguous()
-        outputs = data[-self.num_frames_output :, ...].permute(0, 1, 2).contiguous()
+        if self.num_frames_output == 0:
+            inputs = data
+            outputs = torch.empty((0, data.shape[1], data.shape[2]))
+        else:
+            inputs = data[: -self.num_frames_output, ...].permute(0, 1, 2).contiguous()
+            outputs = data[-self.num_frames_output :, ...].permute(0, 1, 2).contiguous()
 
         return inputs, outputs, first_field
 
