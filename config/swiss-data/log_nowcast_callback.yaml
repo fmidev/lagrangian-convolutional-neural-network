@@ -1,0 +1,52 @@
+log_nowcast:
+  # Display radar plot every {train_display} training step
+  train_display: 10
+  # Display radar plot on valid/test steps corresponding to batch_idxs' contained in {verif_display}
+  verif_display: [0]
+  plot_batch_indices: [0]
+
+  plot_conf:
+    RATE_lagr:
+      cmap_qty: RR_diff
+      title: "R diff [mm h$^{-1}$]"
+      extend: both
+    RATE_lagr_diff:
+      cmap_qty: RR_diff
+      title: "R diff [mm h$^{-1}$]"
+      extend: both
+    echotop_20_over_ml_lagr:
+      cmap_qty: H_ml
+      title: "Echo top 20 dBZ over melting level [km]"
+      extend: max
+    echotop_45_over_ml_lagr:
+      cmap_qty: H_ml
+      title: "Echo top 45 dBZ over melting level [km]"
+      extend: max
+    echotop_20_lagr:
+      cmap_qty: H
+      title: "Echo top 20 dBZ [km]"
+      extend: max
+    echotop_45_lagr:
+      cmap_qty: H
+      title: "Echo top 45 dBZ [km]"
+      extend: max
+    zdr_anomaly_below_ml_max_lagr:
+      cmap_qty: TRENDSS
+      title: "Norm. ZDR anomaly (max bML) [dB]"
+      extend: max
+    zdr_anomaly_total_max_lagr:
+      cmap_qty: TRENDSS
+      title: "Norm. ZDR anomaly (max) [dB]"
+      extend: max
+    zdr_column_lagr:
+      cmap_qty: zdr_column
+      title: "Zdr column height [m]"
+      extend: max
+    HGHT_lagr:
+      cmap_qty: FZT
+      title: "Environmental 0 °C altitude [m]"
+      extend: max
+    ZDR_CORR_lagr:
+      cmap_qty: ZDR
+      title: "Zdr [dB]"
+      extend: neither

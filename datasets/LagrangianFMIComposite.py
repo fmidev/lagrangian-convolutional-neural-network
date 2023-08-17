@@ -239,7 +239,7 @@ class LagrangianFMIComposite(Dataset):
             )
         )
 
-    def get_window(self, index):
+    def get_window(self, index, **kwargs):
         """Utility function to get window."""
         if isinstance(index, int):
             return self.windows.iloc[index].dt.to_pydatetime()
@@ -253,7 +253,7 @@ class LagrangianFMIComposite(Dataset):
                 ]
             )
 
-    def get_common_time(self, index):
+    def get_common_time(self, index, **kwargs):
         window = self.get_window(index)
         return window[self.common_time_index]
 
@@ -269,7 +269,7 @@ class LagrangianFMIComposite(Dataset):
         if self.normalization == "none":
             return data
 
-    def invScaler(self, data: torch.Tensor):
+    def invScaler(self, data: torch.Tensor, **kwargs):
         if self.normalization == "log_unit_diff":
             return (data * 2 - 1) * self.log_unit_diff_cutoff
         if self.normalization == "log_unit":

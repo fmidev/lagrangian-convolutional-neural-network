@@ -45,7 +45,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
         batch_indices_ = batch_indices_.tolist()
 
         for bi, b_idx in enumerate(batch_indices_):
-            common_time = trainer.datamodule.predict_dataset.get_common_time(b_idx)
+            common_time = trainer.datamodule.predict_dataset.get_common_time(b_idx, in_datetime=True)
             if not self.write_leadtimes_separately:
                 fn = (
                     Path(
@@ -100,7 +100,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
                         write_image(
                             group=ds_group,
                             ds_name="data",
-                            data=packed,
+                            data=np.flipud(packed),
                             what_attrs=what_attrs,
                         )
             else:

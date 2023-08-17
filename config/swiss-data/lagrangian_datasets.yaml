@@ -1,0 +1,138 @@
+# Configuration for the Pytorch lightning dataset and datamodule
+train_dataset:
+  datapath: /scratch/jritvane/datasets/data/nc-19052023/data
+  filename_format: "lagrangian_data_{year}{month:02d}{day:02d}{hour:02d}{minute:02d}.nc"
+  split_list_path: /scratch/jritvane/src/swiss_data_test/datelists/swiss_rainy_days_100_52021_92022_{split}.txt
+  patch_list: /scratch/jritvane/src/swiss_data_test/config/train-20230719/patch_info_202307191150.csv
+  image_size: [640, 710]
+  n_samples: 130000
+  n_categories: 50
+  patch_size: [64, 64]
+  bbox: [269, 525, 203, 459]
+  # bbox: null
+  bbox_image_size: [256, 256]
+  # bbox_image_size: [64, 64]
+  input_block_length: 4
+  prediction_block_length: 6
+  len_date_block: 48
+  common_time_index: 7
+  input_features: [
+      RATE_lagr,
+      # echotop_45_lagr,
+      # ZDR_CORR_lagr,
+      # zdr_column_lagr,
+      # zdr_anomaly_below_ml_max_lagr,
+    ]
+  output_features: ["RATE_lagr"]
+
+  normalization:
+    RATE_lagr_diff:
+      mean: 0.0
+      std: 2.318
+    RATE_lagr:
+      mean: 0.0
+      # std: 2.621
+      std: 1.0
+    echotop_20_over_ml_lagr:
+      mean: 0.0
+      std: 2554.161
+    echotop_45_over_ml_lagr:
+      mean: 0.0
+      std: 3145.632
+    echotop_20_lagr:
+      mean: 0.0
+      std: 5276.324
+    echotop_45_lagr:
+      mean: 0.0
+      std: 5328.880
+    zdr_anomaly_below_ml_max_lagr:
+      mean: 0.0
+      std: 1.172
+    zdr_anomaly_total_max_lagr:
+      mean: 0.0
+      std: 1.169
+    zdr_column_lagr:
+      mean: 0.0
+      std: 880.827
+    HGHT_lagr:
+      mean: 3178.692
+      std: 3263.212
+    ZDR_CORR_lagr:
+      mean: 0.0
+      std: 0.569
+
+valid_dataset:
+  advection_file_path: "/scratch/jritvane/advection_fields/%Y/%m/%d/motion_%Y%m%d%H%M.nc"
+  datapath: /scratch/jritvane/datasets/data/nc-19052023/data
+  filename_format: "lagrangian_data_{year}{month:02d}{day:02d}{hour:02d}{minute:02d}.nc"
+  split_list_path: /scratch/jritvane/src/swiss_data_test/datelists/swiss_rainy_days_100_52021_92022_{split}.txt
+  image_size: [640, 710]
+  n_samples: 130000
+  n_categories: 50
+  patch_size: [64, 64]
+  # bbox: [269, 525, 203, 459]
+  bbox: [0, 640, 6, 710]
+  bbox_image_size: [640, 704]
+  input_block_length: 4
+  prediction_block_length: 6
+  len_date_block: 48
+  common_time_index: 7
+  input_features: [
+      RATE_lagr,
+      # echotop_45_lagr,
+      # ZDR_CORR_lagr,
+      # zdr_column_lagr,
+      # zdr_anomaly_below_ml_max_lagr,
+    ]
+  output_features: ["RATE_lagr"]
+
+  normalization:
+    RATE_lagr_diff:
+      mean: 0.0
+      std: 2.318
+    RATE_lagr:
+      mean: 0.0
+      # std: 2.621
+      std: 1.0
+    echotop_20_over_ml_lagr:
+      mean: 0.0
+      std: 2554.161
+    echotop_45_over_ml_lagr:
+      mean: 0.0
+      std: 3145.632
+    echotop_20_lagr:
+      mean: 0.0
+      std: 5276.324
+    echotop_45_lagr:
+      mean: 0.0
+      std: 5328.880
+    zdr_anomaly_below_ml_max_lagr:
+      mean: 0.0
+      std: 1.172
+    zdr_anomaly_total_max_lagr:
+      mean: 0.0
+      std: 1.169
+    zdr_column_lagr:
+      mean: 0.0
+      std: 880.827
+    HGHT_lagr:
+      mean: 3178.692
+      std: 3263.212
+    ZDR_CORR_lagr:
+      mean: 0.0
+      std: 0.569
+
+datamodule:
+  train_batch_size: 8
+  test_batch_size: 16
+  valid_batch_size: 8
+  predict_batch_size: 1
+  num_workers: 16
+  transformations:
+    # multi_random_crop:
+    #   output_size: [64, 64]
+    #   n_crops: 4
+    vertical_flip:
+      p: 0.5
+    horizontal_flip:
+      p: 0.5

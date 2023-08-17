@@ -1,7 +1,9 @@
-name: lcnn
+name: lcnn_gpu
 channels:
   - conda-forge
-  - defaults
+  - pytorch
+  - nvidia
+  - nodefaults
 dependencies:
   - attrdict
   - arm_pyart
@@ -17,6 +19,7 @@ dependencies:
   - tensorboard
   - torchvision
   # - torchaudio
+  - pytorch-cuda=11.8
   - pytorch
   # - cpuonly
   - pysteps
@@ -32,3 +35,5 @@ dependencies:
   - cmcrameri
   - opencv
   - sh
+  - xarray
+  - netcdf4

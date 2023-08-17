@@ -10,7 +10,8 @@ from matplotlib import pyplot as plt
 from pysteps.visualization.motionfields import quiver
 import hdf5plugin
 import dask
-
+import pandas as pd
+import xarray as xr
 
 def transform_to_eulerian(
     input_fields,
@@ -423,6 +424,30 @@ def read_advection_fields_from_h5(filename):
             advfields[(startdate, enddate)] = data
     return advfields
 
+
+def read_advection_fields_from_nc(filename):
+    """Read advection fields from NetCDF file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file.
+
+    Returns
+    -------
+    dict
+        Dictionary of advection fields, with keys being the start and end times
+
+    """
+    advfields = {}
+    ds = xr.open_dataset(filename)
+    for endtime, ds_ in ds.groupby("endtime"):
+        endtime = pd.Timestamp(endtime).to_pydatetime()
+        for starttime, ds__ in ds_.groupby("starttime"):
+            starttime = pd.Timestamp(starttime).to_pydatetime()
+            motion_field = np.stack([ds__.U, ds__.V])
+            advfields[(starttime, endtime)] = motion_field
+    return advfields
 
 def save_lagrangian_fields_h5_with_advfields(R, dates, t0, advfields, outputconf):
     """Save Lagrangian precipitation fields into HDF5 files.

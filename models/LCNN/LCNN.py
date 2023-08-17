@@ -4,11 +4,14 @@ import numpy as np
 import torch
 import pytorch_lightning as pl
 from scipy.ndimage import uniform_filter
+from functools import partial
 
 from networks import RainNet as RN
 from utils import (
     read_advection_fields_from_h5,
     transform_to_eulerian,
+    read_advection_fields_from_nc,
+    rainrate_to_dbz,
 )
 from costfunctions import *
 
@@ -48,6 +51,12 @@ class LCNN(pl.LightningModule):
         self.predict_leadtimes = config.prediction.predict_leadtimes
         self.predict_extrap_kwargs = config.prediction.extrap_kwargs
         self.euler_transform_nworkers = config.prediction.euler_transform_nworkers
+        if "zr_a" in config.prediction_output and "zr_b" in config.prediction_output:
+            self.zr_a = config.prediction_output.zr_a
+            self.zr_b = config.prediction_output.zr_b
+        else:
+            self.zr_a = 223.0
+            self.zr_b = 1.53
 
         # 1.0 corresponds to harmonic loss weight decrease,
         # 0.0 to no decrease at all,
@@ -106,10 +115,10 @@ class LCNN(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         y_hat, total_loss = self._iterative_prediction(batch=batch, stage="valid")
-        self.log("val_loss", total_loss)
+        self.log("val_loss", total_loss, sync_dist=True)
         return {"prediction": y_hat, "loss": total_loss}
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         torch.cuda.empty_cache()
         sch = self.lr_schedulers()
         if isinstance(sch, torch.optim.lr_scheduler.ReduceLROnPlateau):
@@ -132,15 +141,20 @@ class LCNN(pl.LightningModule):
         y_seq = self._iterative_prediction(batch=(x, y, idx), stage="predict")
 
         # Transform from scaled to mm/hh
-        invScaler = self.trainer.datamodule.predict_dataset.invScaler
-        y_seq = invScaler(y_seq)
-        x = invScaler(x_)
+        if self.trainer.datamodule.predict_dataset.__class__.__name__ == "LagrangianFMICompositeDataset":
+            invScaler = self.trainer.datamodule.predict_dataset.invScaler
+        elif self.trainer.datamodule.predict_dataset.__class__.__name__ == "LagrangianSwissCompositeDataset":
+            invScaler = self.trainer.datamodule.predict_dataset.apply_denormalization
+        else:
+            raise NotImplementedError(f"Dataset {self.trainer.datamodule.predit_dataset} not implemented")
+        y_seq = invScaler(y_seq, target=True, feature_axis=-4)
+        x = invScaler(x_, target=False, feature_axis=-4)
 
         # If we applied differencing, integrate back to full fields
         if self.apply_differencing:
             # This should be a dummy transform that has no effect (since scaling should be "none"),
             # but keep to match what is done to predictions
-            first_x = invScaler(first_x)
+            first_x = invScaler(first_x, target=False, feature_axis=-3)
             # Integrate observation back to full fields
             x[:, 0, :, :] = first_x + x[:, 0, :, :]
             for i in range(1, x.shape[1]):
@@ -159,9 +173,9 @@ class LCNN(pl.LightningModule):
         for batch_idx in range(x.shape[0]):
             # Get commontime
             common_time = self.trainer.datamodule.predict_dataset.get_common_time(
-                idx[batch_idx]
+                idx[batch_idx], in_datetime=True
             )
-            window = self.trainer.datamodule.predict_dataset.get_window(idx[batch_idx])
+            window = self.trainer.datamodule.predict_dataset.get_window(idx[batch_idx], in_datetime=True)
 
             # If differencing, the first time is dropped
             if self.apply_differencing:
@@ -175,9 +189,12 @@ class LCNN(pl.LightningModule):
                     self.trainer.datamodule.predict_dataset.common_time_index + 1
                 )
 
-            filename = self.trainer.datamodule.predict_dataset.get_filename(common_time)
-
-            advfields = read_advection_fields_from_h5(filename)
+            if self.trainer.datamodule.predict_dataset.__class__.__name__ == "LagrangianFMICompositeDataset":
+                filename = self.trainer.datamodule.predict_dataset.get_filename(common_time)
+                advfields = read_advection_fields_from_h5(filename)
+            elif self.trainer.datamodule.predict_dataset.__class__.__name__ == "LagrangianSwissCompositeDataset":
+                filename = common_time.strftime(self.trainer.datamodule.predict_dataset.advection_file_path)
+                advfields = read_advection_fields_from_nc(filename)
 
             # Apply bbox and downsample advfields
             downsample = self.trainer.datamodule.predict_dataset.downsample_data
@@ -226,15 +243,14 @@ class LCNN(pl.LightningModule):
                 euler_fields[euler_fields < 0] = 0
                 euler_fields[nan_mask] = np.nan
 
-            output_fields[batch_idx, ...] = torch.from_numpy(
-                euler_fields[x.shape[1] :, ...]
-            )
-
+            # output_fields[batch_idx, ...] = torch.from_numpy(
+            #     euler_fields[x.shape[1] :, ...]
+            # )
         # Transform from mm/h to dBZ
-        output_fields = self.trainer.datamodule.predict_dataset.from_transformed(
-            output_fields, scaled=False
+        euler_fields = rainrate_to_dbz(euler_fields, zr_a=self.zr_a, zr_b=self.zr_b)
+        output_fields[batch_idx, ...] = torch.from_numpy(
+            euler_fields[x_.shape[1] :, ...]
         )
-
         del x, y_seq, lagrangian_fields, euler_fields, advfields
         return output_fields
 
