@@ -51,6 +51,8 @@ class LCNN(pl.LightningModule):
         self.predict_leadtimes = config.prediction.predict_leadtimes
         self.predict_extrap_kwargs = config.prediction.extrap_kwargs
         self.euler_transform_nworkers = config.prediction.euler_transform_nworkers
+
+        self.output_reflectivity = config.prediction_output.get("output_reflectivity", True)
         if "zr_a" in config.prediction_output and "zr_b" in config.prediction_output:
             self.zr_a = config.prediction_output.zr_a
             self.zr_b = config.prediction_output.zr_b
@@ -132,7 +134,7 @@ class LCNN(pl.LightningModule):
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         # Get data
         if self.apply_differencing:
-            x, y, idx, first_x = batch
+            x, y, idx, last_x = batch
         else:
             x, y, idx = batch
 
@@ -154,13 +156,13 @@ class LCNN(pl.LightningModule):
         if self.apply_differencing:
             # This should be a dummy transform that has no effect (since scaling should be "none"),
             # but keep to match what is done to predictions
-            first_x = invScaler(first_x, target=False, feature_axis=-3)
+            last_x = invScaler(last_x, target=False, feature_axis=-3)
             # Integrate observation back to full fields
-            x[:, 0, :, :] = first_x + x[:, 0, :, :]
-            for i in range(1, x.shape[1]):
-                x[:, i, :, :] = x[:, i, :, :] + x[:, i - 1, :, :]
+            # x[:, 0, :, :] = first_x + x[:, 0, :, :]
+            # for i in range(1, x.shape[1]):
+            #     x[:, i, :, :] = x[:, i, :, :] + x[:, i - 1, :, :]
             # First prediction with last observation
-            y_seq[:, 0, :, :] = y_seq[:, 0, :, :] + x[:, -1, :, :]
+            y_seq[:, 0, :, :] = y_seq[:, 0, :, :] + last_x
             # Iterate through rest of predictions
             for i in range(1, self.predict_leadtimes):
                 y_seq[:, i, :, :] = y_seq[:, i - 1, :, :] + y_seq[:, i, :, :]
@@ -215,14 +217,14 @@ class LCNN(pl.LightningModule):
             # Transform to Eulerian fields
             lagrangian_fields = np.vstack(
                 [
-                    x[batch_idx, ...].detach().cpu(),
+                    # x[batch_idx, ...].detach().cpu(),
                     y_seq[batch_idx, ...].detach().cpu().squeeze(),
                 ]
             )
             euler_fields = transform_to_eulerian(
                 lagrangian_fields,
-                common_time_index,
-                window,
+                0,
+                window[x.shape[1] :],
                 advfields,
                 extrap_kwargs=self.predict_extrap_kwargs,
                 prediction_mode=True,
@@ -247,9 +249,10 @@ class LCNN(pl.LightningModule):
             #     euler_fields[x.shape[1] :, ...]
             # )
         # Transform from mm/h to dBZ
-        euler_fields = rainrate_to_dbz(euler_fields, zr_a=self.zr_a, zr_b=self.zr_b)
+        if self.output_reflectivity:
+            euler_fields = rainrate_to_dbz(euler_fields, zr_a=self.zr_a, zr_b=self.zr_b)
         output_fields[batch_idx, ...] = torch.from_numpy(
-            euler_fields[x_.shape[1] :, ...]
+            euler_fields
         )
         del x, y_seq, lagrangian_fields, euler_fields, advfields
         return output_fields

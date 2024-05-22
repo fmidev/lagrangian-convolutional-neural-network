@@ -29,7 +29,7 @@ def transform_to_eulerian(
     input_fields : np.ndarray
         Input precipitation fields, with shape (N, height, width).
     t0 : int
-        Number of the "common time" that all other fields are extrapolated to
+        Number of the "common time" that all other fields were extrapolated to
         (1-based; from 1 ... N).
     dates : list-like
         List of dates corresponding to each field.
@@ -83,7 +83,9 @@ def transform_to_eulerian(
 
     def extrapolate_forwards(i, field, advfields):
         # Extrapolate forwards
-        if prediction_mode:
+        if len(advfields) == 1:
+            advfield = list(advfields.values())[0].copy()
+        elif prediction_mode:
             # Look for the longest motion field interval ending at common_time
             possible_keys = [k for k in advfields.keys() if k[1] == dates[t0 - 1]]
             if len(possible_keys) == 1:
@@ -92,8 +94,6 @@ def transform_to_eulerian(
                 i_key = np.argmax(np.diff([*sorted(possible_keys)], axis=0))
                 key = sorted(advfields.keys())[i_key]
             advfield = advfields[key]
-        elif len(advfields) == 1:
-            advfield = list(advfields.values())[0].copy()
         else:
             # Here, get correct advection field based on times
             try:
@@ -104,6 +104,7 @@ def transform_to_eulerian(
                 raise KeyError(
                     f"Correct advection field for time {dates[i]} doesn't exist!"
                 )
+
         output_field = semilagrangian.extrapolate(
             field,
             advfield,
@@ -113,21 +114,31 @@ def transform_to_eulerian(
         return i, output_field
 
     delayed = []
-    for i in range(t0 - 1):
-        # Extrapolate backwards in time from common time to original time
-        delayed.append(
-            dask.delayed(extrapolate_backwards)(i, input_fields[i, :], advfields)
-        )
 
-    # Field at t0 is not transformed
-    output_fields[t0 - 1, :] = input_fields[t0 - 1, :]
+    if t0 == 0:
+        # No previous timesteps, just extrapolate forwards
+        for i in range(t0, n_fields):
+            # Extrapolate forwards in time from common time to original time
+            # This can also be predicting!
+            delayed.append(
+                dask.delayed(extrapolate_forwards)(i, input_fields[i, :], advfields)
+            )
+    else:
+        for i in range(t0 - 1):
+            # Extrapolate backwards in time from common time to original time
+            delayed.append(
+                dask.delayed(extrapolate_backwards)(i, input_fields[i, :], advfields)
+            )
 
-    for i in range(t0, n_fields):
-        # Extrapolate forwards in time from common time to original time
-        # This can also be predicting!
-        delayed.append(
-            dask.delayed(extrapolate_forwards)(i, input_fields[i, :], advfields)
-        )
+        # Field at t0 is not transformed
+        output_fields[t0 - 1, :] = input_fields[t0 - 1, :]
+
+        for i in range(t0, n_fields):
+            # Extrapolate forwards in time from common time to original time
+            # This can also be predicting!
+            delayed.append(
+                dask.delayed(extrapolate_forwards)(i, input_fields[i, :], advfields)
+            )
     scheduler = "processes" if n_workers > 1 else "single-threaded"
     res = dask.compute(*delayed, num_workers=n_workers, scheduler=scheduler)
 

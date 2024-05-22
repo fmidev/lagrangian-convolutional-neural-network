@@ -82,9 +82,7 @@ class LagrangianSwissCompositeDataset(Dataset):
             for feature in output_features:
                 self.select_output_features[self.feature_names.index(feature)] = True
             self.num_output_features = len(output_features)
-            self.output_feature_names = [
-                n for n in feature_names if n in output_features
-            ]
+            self.output_feature_names = [n for n in feature_names if n in output_features]
 
         # Read normalization parameters
         if normalization is not None:
@@ -92,17 +90,11 @@ class LagrangianSwissCompositeDataset(Dataset):
             self.normalization_methods = {}
             self.denormalization_methods = {}
             for i, feature in enumerate(self.feature_names):
-                self.normalization_methods[feature] = partial(
-                    normalize_mean_std, **normalization[feature]
-                )
-                self.denormalization_methods[feature] = partial(
-                    denormalize_mean_std, **normalization[feature]
-                )
+                self.normalization_methods[feature] = partial(normalize_mean_std, **normalization[feature])
+                self.denormalization_methods[feature] = partial(denormalize_mean_std, **normalization[feature])
             # Get indices of features to normalize after selecting features
             # indices = np.cumsum(self.select_features) - 1
-            self.normalization_methods_by_dataindex = {
-                i: name for i, name in enumerate(self.feature_names)
-            }
+            self.normalization_methods_by_dataindex = {i: name for i, name in enumerate(self.feature_names)}
 
         else:
             self.normalize = False
@@ -135,9 +127,7 @@ class LagrangianSwissCompositeDataset(Dataset):
             names=["date", "path"],
         )
         self.date_list.set_index(self.date_list.date, inplace=True)
-        self.split_list = pd.read_csv(
-            split_list_path.format(split=split), header=None, parse_dates=[0]
-        )
+        self.split_list = pd.read_csv(split_list_path.format(split=split), header=None, parse_dates=[0])
         self.split_list.set_index(self.split_list.columns[0], inplace=True)
         # self.bad_times = pd.read_csv(
         #     self.datapath.parents[0] / "bad_timesteps.txt",
@@ -152,10 +142,7 @@ class LagrangianSwissCompositeDataset(Dataset):
         # Settings for differencing
         self.apply_differencing = apply_differencing
         self.difference_indices = np.array(
-            [
-                True if "RATE" in var else False
-                for i, var in enumerate(self.feature_names)
-            ]
+            [True if "RATE" in var else False for i, var in enumerate(self.feature_names)]
         )
         self.pick_num_inputs = self.input_block_length
         if self.apply_differencing:
@@ -178,13 +165,9 @@ class LagrangianSwissCompositeDataset(Dataset):
         block_y = int(im.shape[1] / self.input_image_size[1])
         if self.upsampling_method == "average":
             # Upsample by averaging
-            im = block_reduce(
-                im, func=np.nanmean, cval=0, block_size=(block_x, block_y)
-            )
+            im = block_reduce(im, func=np.nanmean, cval=0, block_size=(block_x, block_y))
         else:
-            raise NotImplementedError(
-                f"Upsampling {self.upsampling_method} not yet implemented!"
-            )
+            raise NotImplementedError(f"Upsampling {self.upsampling_method} not yet implemented!")
         return im
 
     def apply_normalization(self, data, feature_axis=-3, target=False):
@@ -207,9 +190,7 @@ class LagrangianSwissCompositeDataset(Dataset):
                     if feature_axis == -3:
                         data[..., data_index, :, :] = func(data[..., data_index, :, :])
                     elif feature_axis == -4:
-                        data[..., data_index, :, :, :] = func(
-                            data[..., data_index, :, :, :]
-                        )
+                        data[..., data_index, :, :, :] = func(data[..., data_index, :, :, :])
                     else:
                         raise ValueError("Feature axis must be -3 or -4.")
         return data
@@ -234,9 +215,7 @@ class LagrangianSwissCompositeDataset(Dataset):
                     if feature_axis == -3:
                         data[..., data_index, :, :] = func(data[..., data_index, :, :])
                     elif feature_axis == -4:
-                        data[..., data_index, :, :, :] = func(
-                            data[..., data_index, :, :, :]
-                        )
+                        data[..., data_index, :, :, :] = func(data[..., data_index, :, :, :])
                     else:
                         raise ValueError("Feature axis must be -3 or -4.")
         return data
@@ -246,31 +225,19 @@ class LagrangianSwissCompositeDataset(Dataset):
         num_blocks = int(len(self.split_list) / self.len_date_block)
         blocks = np.array_split(self.split_list.index.to_pydatetime(), num_blocks)
         self.windows = pd.DataFrame(
-            np.concatenate(
-                [
-                    np.lib.stride_tricks.sliding_window_view(b, self.num_frames)
-                    for b in blocks
-                ]
-            )
+            np.concatenate([np.lib.stride_tricks.sliding_window_view(b, self.num_frames) for b in blocks])
         )
         # If the number of input/output frames is different than
         # when creating the dataset,
         # we can have windows that do not exist in the dataset
         # So we remove those
-        self.windows = self.windows.loc[
-            self.windows[self.common_time_index].isin(self.date_list.index)
-        ]
-        self.date_index = self.date_list.loc[
-            self.windows[self.common_time_index].values
-        ]
+        self.windows = self.windows.loc[self.windows[self.common_time_index].isin(self.date_list.index)]
+        self.date_index = self.date_list.loc[self.windows[self.common_time_index].values]
 
     def get_window(self, idx, in_datetime=False):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        window = self.windows.loc[
-            self.windows[self.common_time_index].values
-            == self.date_index.iloc[idx].date
-        ]
+        window = self.windows.loc[self.windows[self.common_time_index].values == self.date_index.iloc[idx].date]
         if in_datetime:
             return pd.to_datetime(window.values.squeeze()).to_pydatetime().tolist()
         return window
@@ -284,9 +251,7 @@ class LagrangianSwissCompositeDataset(Dataset):
 
     def get_index_by_date(self, date):
         try:
-            idx = np.argwhere(
-                self.date_index.date.dt.to_pydatetime() == date
-            ).flatten()[-1]
+            idx = np.argwhere(self.date_index.date.dt.to_pydatetime() == date).flatten()[-1]
         except IndexError:
             idx = None
         return idx
@@ -295,16 +260,14 @@ class LagrangianSwissCompositeDataset(Dataset):
         data = torch.from_numpy(data_in.astype(np.float32))
 
         first_field = torch.empty((1, *self.image_size))
+        last_field = torch.empty((1, *self.image_size))
         if self.apply_differencing:
             # Difference data
             data_out = torch.zeros((self.num_frames, *data.shape[1:]))
             first_field = data[0, self.difference_indices, ...].clone()
-            data_out[:, self.difference_indices, ...] = torch.diff(
-                data[:, self.difference_indices, ...], dim=0
-            )
-            data_out[:, ~self.difference_indices, ...] = data[
-                1:, ~self.difference_indices, ...
-            ]
+            last_field = data[-self.prediction_block_length - 1, self.difference_indices, ...].clone()
+            data_out[:, self.difference_indices, ...] = torch.diff(data[:, self.difference_indices, ...], dim=0)
+            data_out[:, ~self.difference_indices, ...] = data[1:, ~self.difference_indices, ...]
         else:
             data_out = data
 
@@ -320,18 +283,12 @@ class LagrangianSwissCompositeDataset(Dataset):
         # Divide to input & output
         # Use output frame number, since that is constant whether we apply differencing or not
         # Change from (time, channels, x, y) to (channels, time, x, y)
-        inputs = (
-            data_out[: -self.prediction_block_length, ...]
-            .permute(1, 0, 2, 3)
-            .contiguous()
-        )
+        inputs = data_out[: -self.prediction_block_length, ...].permute(1, 0, 2, 3).contiguous()
         outputs = (
-            data_out[-self.prediction_block_length :, self.select_output_features, ...]
-            .permute(1, 0, 2, 3)
-            .contiguous()
+            data_out[-self.prediction_block_length :, self.select_output_features, ...].permute(1, 0, 2, 3).contiguous()
         )
 
-        return inputs, outputs, first_field
+        return inputs, outputs, first_field, last_field
 
     def get_filename(self, idx):
         """Get filename for a given index."""
@@ -357,9 +314,7 @@ class LagrangianSwissCompositeDataset(Dataset):
                 ds[self.feature_names]
                 .to_array()
                 .transpose("time", "variable", "y", "x")[
-                    (
-                        self.common_time_index_original + 1 - (self.pick_num_inputs)
-                    ) : self.common_time_index_original
+                    (self.common_time_index_original + 1 - (self.pick_num_inputs)) : self.common_time_index_original
                     + 1
                     + self.prediction_block_length,
                     :,
@@ -376,12 +331,12 @@ class LagrangianSwissCompositeDataset(Dataset):
             data_ = self.apply_bbox(data_)
 
         # Normalize data
-        inputs, outputs, first_field = self.postprocessing(data_)
+        inputs, outputs, first_field, last_field = self.postprocessing(data_)
 
         # import ipdb; ipdb.set_trace()
 
         if self.predicting:
-            return inputs.squeeze(), outputs.squeeze(), idx, first_field.squeeze()
+            return inputs.squeeze(), outputs.squeeze(), idx, last_field.squeeze()
         else:
             return inputs.squeeze(), outputs.squeeze(), idx
 
@@ -396,9 +351,7 @@ class LagrangianSwissCompositeDataset(Dataset):
 class LagrangianSwissCompositeDataModule(pl.LightningDataModule):
     """Lightning DataModule for zarr-stored data."""
 
-    def __init__(
-        self, train_dataconfig, valid_dataconfig, module_params, predict_list="predict"
-    ):
+    def __init__(self, train_dataconfig, valid_dataconfig, module_params, predict_list="predict"):
         """Initialize the data module."""
         super().__init__()
         self.train_dsconfig = train_dataconfig
@@ -423,7 +376,7 @@ class LagrangianSwissCompositeDataModule(pl.LightningDataModule):
         # called on every GPU
         # if stage == "train":
         self.train_dataset = LagrangianSwissCompositeDataset(split="train", **self.train_dsconfig)
-         # if stage == "val":
+        # if stage == "val":
         self.valid_dataset = LagrangianSwissCompositeDataset(split="valid", **self.valid_dsconfig)
         # if stage == "test":
         self.test_dataset = LagrangianSwissCompositeDataset(split="test", **self.valid_dsconfig)
@@ -431,7 +384,7 @@ class LagrangianSwissCompositeDataModule(pl.LightningDataModule):
         # Predicting
         self.predict_dataset = LagrangianSwissCompositeDataset(
             split=self.predict_list, predicting=True, **self.valid_dsconfig
-            )
+        )
 
     def train_dataloader(self):
         """Return the training dataloader."""

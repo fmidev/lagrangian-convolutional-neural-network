@@ -6,6 +6,8 @@ from datetime import timedelta
 import h5py
 from pathlib import Path
 
+from . import lookup_tables
+
 
 class LagrangianHDF5Writer(BasePredictionWriter):
     def __init__(
@@ -19,6 +21,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
         how_attrs: dict = {},
         write_leadtimes_separately: bool = False,
         write_interval: str = "batch",
+        use_lookup_table: bool = False,
         **kwargs,
     ):
         super().__init__(write_interval)
@@ -30,6 +33,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
         self.group_format = group_format
         self.write_leadtimes_separately = write_leadtimes_separately
         self.filter_dbz = filter_dbz
+        self.use_lookup_table = use_lookup_table
 
     def write_on_batch_end(
         self,
@@ -47,16 +51,13 @@ class LagrangianHDF5Writer(BasePredictionWriter):
         for bi, b_idx in enumerate(batch_indices_):
             common_time = trainer.datamodule.predict_dataset.get_common_time(b_idx, in_datetime=True)
             if not self.write_leadtimes_separately:
-                fn = (
-                    Path(
-                        self.output_dir.format(
-                            year=common_time.year,
-                            month=common_time.month,
-                            day=common_time.day,
-                        )
+                fn = Path(
+                    self.output_dir.format(
+                        year=common_time.year,
+                        month=common_time.month,
+                        day=common_time.day,
                     )
-                    / Path(self.filename.format(common_time=common_time))
-                )
+                ) / Path(self.filename.format(common_time=common_time))
                 fn.parents[0].mkdir(parents=True, exist_ok=True)
                 with h5py.File(fn, "a") as f:
                     where = f.require_group("where")
@@ -79,24 +80,26 @@ class LagrangianHDF5Writer(BasePredictionWriter):
                     group = f.require_group(group_name)
 
                     for i in range(prediction.shape[1]):
-                        date = common_time + timedelta(
-                            minutes=(i + 1)
-                            * trainer.datamodule.predict_dataset.timestep
-                        )
+                        date = common_time + timedelta(minutes=(i + 1) * trainer.datamodule.predict_dataset.timestep)
                         dname = f"{i + 1}"
                         ds_group = group.require_group(dname)
 
                         what_attrs = self.what_attrs.copy()
-                        what_attrs["validtime"] = np.string_(
-                            f"{date:%Y-%m-%d %H:%M:%S}"
-                        )
+                        what_attrs["validtime"] = np.string_(f"{date:%Y-%m-%d %H:%M:%S}")
 
-                        packed = arr_compress_uint8(
-                            prediction[bi, i, ...].detach().cpu().numpy(),
-                            nodata_val=what_attrs["nodata"],
-                            undetect_val=what_attrs["undetect"],
-                            filter_dbz=self.filter_dbz,
-                        )
+                        if self.use_lookup_table:
+                            packed = arr_compress_uint8_lut(prediction[bi, i, ...].detach().cpu().numpy())
+                            what_attrs["nodata"] = 255
+                            what_attrs["undetect"] = 0
+                            what_attrs["lookup_table"] = "metranet_rr"
+                        else:
+                            packed = arr_compress_uint8(
+                                prediction[bi, i, ...].detach().cpu().numpy(),
+                                nodata_val=what_attrs["nodata"],
+                                undetect_val=what_attrs["undetect"],
+                                filter_dbz=self.filter_dbz,
+                            )
+
                         write_image(
                             group=ds_group,
                             ds_name="data",
@@ -113,11 +116,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
                             month=common_time.month,
                             day=common_time.day,
                         )
-                    ) / Path(
-                        self.filename.format(
-                            common_time=common_time, validtime=date, leadtime=leadtime
-                        )
-                    )
+                    ) / Path(self.filename.format(common_time=common_time, validtime=date, leadtime=leadtime))
                     fn.parents[0].mkdir(parents=True, exist_ok=True)
                     with h5py.File(fn, "a") as f:
                         where = f.require_group("where")
@@ -140,9 +139,7 @@ class LagrangianHDF5Writer(BasePredictionWriter):
                         group = f.require_group(group_name)
 
                         what_attrs = self.what_attrs.copy()
-                        what_attrs["validtime"] = np.string_(
-                            f"{date:%Y-%m-%d %H:%M:%S}"
-                        )
+                        what_attrs["validtime"] = np.string_(f"{date:%Y-%m-%d %H:%M:%S}")
 
                         packed = arr_compress_uint8(
                             prediction[bi, i, ...].detach().cpu().numpy(),
@@ -167,6 +164,23 @@ class LagrangianHDF5Writer(BasePredictionWriter):
         pass
 
 
+def arr_compress_uint8_lut(dBZ_array, lut="metranet_rr"):
+    """Pack to 8-bit using lookup table."""
+
+    if lut == "metranet_rr":
+        table = lookup_tables.METRANET_RR_8BIT_CENTERS
+
+    else:
+        raise ValueError(f"Unknown lookup table {lut}")
+
+    float_arr = dBZ_array.copy()
+    float_arr[np.isnan(float_arr)] = 7000
+    packed = np.searchsorted(table, float_arr)
+    packed[np.isnan(dBZ_array)] = 255
+    packed[dBZ_array < 0] = 0
+    return packed.astype(np.uint8)
+
+
 def arr_compress_uint8(
     dBZ_array: np.ndarray,
     nodata_val: np.uint8 = 255,
@@ -189,9 +203,7 @@ def write_image(group: h5py.Group, ds_name: str, data: np.ndarray, what_attrs: d
         del group[ds_name]
     except:
         pass
-    dataset = group.create_dataset(
-        ds_name, data=data, dtype="uint8", compression="gzip", compression_opts=9
-    )
+    dataset = group.create_dataset(ds_name, data=data, dtype="uint8", compression="gzip", compression_opts=9)
     dataset.attrs["CLASS"] = np.string_("IMAGE")
     dataset.attrs["IMAGE_VERSION"] = np.string_("1.2")
 

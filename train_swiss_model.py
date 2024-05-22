@@ -40,6 +40,13 @@ def main(configpath, checkpoint=None):
 
     setup_logging(outputconf.logging)
 
+    # Debug iterate datamodule
+    # dset = LagrangianSwissCompositeDataset(split="train", **dsconf.train_dataset)
+    # for batch in dset:
+    #     import ipdb
+
+    #     ipdb.set_trace()
+
     datamodel = LagrangianSwissCompositeDataModule(
         dsconf.train_dataset,
         dsconf.valid_dataset,
@@ -51,7 +58,7 @@ def main(configpath, checkpoint=None):
     # Callbacks
     model_ckpt = ModelCheckpoint(
         dirpath=f"checkpoints/{modelconf.train_params.savefile}",
-        save_top_k=3,
+        save_top_k=6,
         monitor="val_loss",
         save_on_train_epoch_end=False,
     )
@@ -59,7 +66,9 @@ def main(configpath, checkpoint=None):
     lr_monitor = LearningRateMonitor(logging_interval="epoch")
     early_stopping = EarlyStopping(**modelconf.train_params.early_stopping)
     device_monitor = DeviceStatsMonitor()
-    tb_logger = pl_loggers.TensorBoardLogger("/scratch/jritvane/src/swiss_data_test/logs", name=f"train_lcnn_{configpath}")
+    tb_logger = pl_loggers.TensorBoardLogger(
+        "/scratch/jritvane/src/swiss_data_test/logs", name=f"train_lcnn_{configpath}"
+    )
     profiler = PyTorchProfiler(profile_memory=False)
 
     trainer = pl.Trainer(
@@ -74,25 +83,20 @@ def main(configpath, checkpoint=None):
         devices=modelconf.train_params.gpus,
         limit_val_batches=modelconf.train_params.val_batches,
         limit_train_batches=modelconf.train_params.train_batches,
-        callbacks=[
-            early_stopping,
-            model_ckpt,
-            lr_monitor,
-            nowcast_image_logger,
-            device_monitor
-        ],
+        callbacks=[early_stopping, model_ckpt, lr_monitor, nowcast_image_logger, device_monitor],
     )
 
     trainer.fit(model=model, datamodule=datamodel, ckpt_path=checkpoint)
 
-    torch.save(model.state_dict(), f"checkpoints/{modelconf.training.savefile}/state_dict_{modelconf.train_params.savefile}.ckpt")
-    trainer.save_checkpoint(f"checkpoints/{modelconf.training.savefile}/{modelconf.train_params.savefile}.ckpt")
+    torch.save(
+        model.state_dict(),
+        f"checkpoints/{modelconf.training.savefile}/state_dict_{modelconf.train_params.savefile}.ckpt",
+    )
+    trainer.save_checkpoint(f"checkpoints/{modelconf.train_params.savefile}/{modelconf.train_params.savefile}.ckpt")
 
 
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    argparser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     argparser.add_argument("config", type=str, help="Configuration folder")
     argparser.add_argument(
         "-c",

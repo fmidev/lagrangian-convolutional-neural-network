@@ -12,7 +12,7 @@ train_params:
   max_time: "00:23:45:00"
   # Validate after every n batches
   val_check_interval: 1.0
-  num_workers: 10
+  num_workers: 16
   gpus: 8
   savefile: "lcnn-diff-rmse-16082023"
   # many leadtimes
@@ -34,8 +34,8 @@ train_params:
 model:
   lr: 1e-04
   rainnet:
-    # input_shape: [4, 256, 704]
-    input_shape: [4, 256, 256]
+    input_shape: [4, 640, 704]
+    # input_shape: [4, 256, 256]
     kernel_size: 3
     mode: "regression"
     conv_shape:
@@ -60,8 +60,8 @@ model:
   apply_differencing: true
   display: 250
 prediction:
-  predict_leadtimes: 6
-  euler_transform_nworkers: 6
+  predict_leadtimes: 24
+  euler_transform_nworkers: 12
   # Extrapolation keyword arguments
   extrap_kwargs:
     # Interpolation order, options
@@ -71,14 +71,16 @@ prediction:
     interp_order: 3
     allow_nonfinite_values: true
 prediction_output:
-  zr_a: 223.0
-  zr_b: 1.53
+  output_reflectivity: false
+  use_lookup_table: true
+  zr_a: 316.0
+  zr_b: 1.5
   # Output directory
   output_dir: /scratch/jritvane/nowcasts/lcnn/
   # Output filename format (can contain {common_time} to change time)
-  filename: lcnn_diff_rmse_16082023.h5
+  filename: lcnn_diff_rmse_swiss_31012024.h5
   # where to save predictions in the HDF5 file
-  group_format: "{common_time:%Y-%m-%d %H:%M:%S}/lcnn-diff-rmse-30lt-20062022"
+  group_format: "{common_time:%Y-%m-%d %H:%M:%S}/lcnn-diff-rmse-31012024"
   # Attributes of the dataset in the HDF5 file
   what_attrs:
     quantity: DBZH

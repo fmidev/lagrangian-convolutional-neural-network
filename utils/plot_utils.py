@@ -26,6 +26,7 @@ QTY_FORMATS = {
     "R": "{x:<4.0f}",
     "R_pysteps": "{x:.1f}",
     "R_log": "{x:.1f}",
+    "R_neg": "{x:.1f}",
     "RR_diff": "{x:.0f}",
     "H": lambda x, p: f"{x/1000:<4.1f}",
     "H_ml": lambda x, p: f"{x/1000:<4.1f}",
@@ -51,6 +52,7 @@ QTY_RANGES = {
     "R": (0.1, 10.0),
     "R_pysteps": (0.1, 100.0),
     "R_log": (0.1, 50.0),
+    "R_neg": (0.1, 50.0),
     "RR_diff": (-10.0, 10.0),
     "H": (0.0, 20000.0),
     "H_ml": (0.0, 5000.0),
@@ -75,6 +77,7 @@ COLORBAR_TITLES = {
     "R": "Rain rate [mm h$^{-1}$]",
     "R_pysteps": "Rain rate [mm h$^{-1}$]",
     "R_log": "Rain rate [mm h$^{-1}$]",
+    "R_neg": "Rain rate [mm h$^{-1}$]",
     "RR_diff": "Rain rate [mm h$^{-1}$]",
     "TRENDSS": "Normalized ZDR anomaly",
     "H": "Height [km]",
@@ -257,6 +260,67 @@ def plot_dbz_image(dbz_arr, day, datatype, figsize=(12, 10)):
     fig.suptitle(f"{day:%Y/%m/%d %H:%M} UTC {datatype}", y=0.92)
     fig.savefig(f"dbz_{day:%Y%m%d%H%M}_{datatype}", dpi=600, bbox_inches="tight")
     plt.close(fig)
+
+
+def plot_pred_debug_fig(input, y_hat, y_hat_summed, pred, **kwargs):
+    nrows = 4
+    ncols = max(input.shape[0], pred.shape[0])
+
+    fig = plt.figure(figsize=(ncols * 4 + 1, nrows * 4), constrained_layout=True)
+    subfigs = fig.subfigures(nrows=nrows, ncols=1, squeeze=True)
+
+    # Plot inputs
+    subfig = subfigs[0]
+    axs = subfig.subplots(nrows=1, ncols=ncols, squeeze=True)
+    subfig.supylabel("Inputs", fontsize="large")
+    for it in range(input.shape[0]):
+        plot_array(
+            axs[it],
+            input[it],
+            qty="RR_diff",
+            colorbar=(it == (input.shape[0] - 1)),
+        )
+    # Remove unused axes
+    for it in range(input.shape[0], ncols):
+        axs[it].axis("off")
+
+    # Plot y_hat
+    subfig = subfigs[1]
+    axs = subfig.subplots(nrows=1, ncols=ncols, squeeze=True)
+    subfig.supylabel("y_hat", fontsize="large")
+    for it in range(y_hat.shape[0]):
+        plot_array(
+            axs[it],
+            y_hat[it],
+            qty="RR_diff",
+            colorbar=(it == (y_hat.shape[0] - 1)),
+        )
+
+    # Plot y_hat_summed
+    subfig = subfigs[2]
+    axs = subfig.subplots(nrows=1, ncols=ncols, squeeze=True)
+    subfig.supylabel("y_hat_summed", fontsize="large")
+    for it in range(y_hat_summed.shape[0]):
+        plot_array(
+            axs[it],
+            y_hat_summed[it],
+            qty="R_neg",
+            colorbar=(it == (y_hat_summed.shape[0] - 1)),
+        )
+
+    # Plot pred
+    subfig = subfigs[3]
+    axs = subfig.subplots(nrows=1, ncols=ncols, squeeze=True)
+    subfig.supylabel("pred", fontsize="large")
+    for it in range(pred.shape[0]):
+        plot_array(
+            axs[it],
+            pred[it],
+            qty="R_neg",
+            colorbar=(it == (pred.shape[0] - 1)),
+        )
+
+    return fig
 
 
 def plot_input_pred_multifeature_array(
@@ -463,6 +527,16 @@ def _get_colormap(quantity):
         # norm = mpl.colors.LogNorm(
         #     vmin=QTY_RANGES[quantity][0], vmax=QTY_RANGES[quantity][1]
         # )
+        ticks = bounds
+    elif quantity == "R_neg":
+        neg_bounds = np.arange(-10, 0, 0.5)
+        pos_bounds = [0.1, 0.2, 0.5, 1, 1.5, 2.5, 5, 7.5, 10, 15, 25, 40, 65, 100]
+        bounds = np.concatenate((neg_bounds, pos_bounds))
+        neg_cmap = plt.get_cmap("cmc.lapaz")(np.linspace(0, 1, len(neg_bounds)))
+        pos_cmap = plt.get_cmap("viridis")(np.linspace(0, 1, len(pos_bounds)))
+        colors = np.vstack((neg_cmap, pos_cmap))
+        cmap = mpl.colors.ListedColormap(colors)
+        norm = mpl.colors.BoundaryNorm(boundaries=bounds, ncolors=len(bounds))
         ticks = bounds
     elif quantity == "RR_diff":
         cmap = "cmc.vik"
