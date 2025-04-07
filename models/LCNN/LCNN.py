@@ -183,8 +183,12 @@ class LCNN(pl.LightningModule):
             downsample = self.trainer.datamodule.predict_dataset.downsample_data
             bbox = self.trainer.datamodule.predict_dataset.apply_bbox
             for k, field in advfields.items():
-                bbox_field = bbox(field)
+                if self.trainer.datamodule.predict_dataset.use_bbox:
+                    bbox_field = bbox(field)
+                else:
+                    bbox_field = field
 
+                # Downsample if needed
                 if bbox_field.shape[1] != x.shape[2]:
                     x_field = downsample(bbox_field[0, ...])
                     y_field = downsample(bbox_field[1, ...])
